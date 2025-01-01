@@ -1,0 +1,24 @@
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    dns:
+      - "1.1.1.1"
+      - "8.8.8.8"
+    environment:
+      TZ: "${TZ}"
+      WEBPASSWORD: "" # Auth by Caddy
+      FTLCONF_LOCAL_IPV4: "pihole"
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "853:853/tcp"
+      - "8081:80/tcp"
+    volumes:
+      - "${DOCKER_CONFIG_PATH}/pihole/etc-pihole:/etc/pihole"
+      - "${DOCKER_CONFIG_PATH}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
+      - "${DOCKER_CONFIG_PATH}/pihole/etc-lighttpd/external.conf:/etc/lighttpd/external.conf"
+    networks:
+      caddy-net:
+        ipv4_address: "${PIHOLE_STATIC_IP}"
+    restart: unless-stopped

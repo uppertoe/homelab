@@ -1,0 +1,10 @@
+include:
+  - containers/caddy/compose.yml
+  - containers/pihole/compose.yml
+
+networks:
+  caddy-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
