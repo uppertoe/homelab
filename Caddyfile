@@ -21,7 +21,7 @@
 }
 
 # a pseudo site that only requires basic auth, sets cookie, and redirects back to original site
-auth.example.com {
+auth.{$DOMAIN} {
   route / {
     # require authentication
     import basic-auth
@@ -37,7 +37,9 @@ auth.example.com {
   }
  
   # fallback
-  respond "Please retry authentication"
+  respond "Access denied" 403 {
+		close
+	}
 
 }
 
