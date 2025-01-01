@@ -3,6 +3,7 @@ include:
   - containers/pihole/compose.yml
   - containers/wg-easy/compose.yml
   - containers/unbound/compose.yml
+  - containers/homeassistant/compose.yml
 
 networks:
   caddy-net:
