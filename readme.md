@@ -3,33 +3,51 @@
 Follow the instructions on the [Raspberry Pi website](https://www.raspberrypi.com/documentation/computers/getting-started.html#raspberry-pi-imager) to add the latest Raspbian OS to a micro SD card
 
 ### Set up SSH keys
-Run the `setup_remote_ssh.sh` script on the remote computer
+Run the `scripts/setup_remote_ssh.sh` script on the remote computer
 - Remember to set the RPi's IP and username in the script before running
 
 Use the resulting connect.sh to SSH in to the RPi
 
-### Harden the RPi's security settings
-Run `sh secure_environment.sh`
+### Clone this repository
+```
+git clone https://github.com/uppertoe/homelab.git
+```
+
+### Change to the Homelab directory
+```
+cd homelab
+```
+
+### Harden the RPi's security settings and install Docker
+Run 
+```
+sh scripts/setup_environment.sh
+```
 
 Note that SSH login with password authentication will no longer be possible
 
-### Clone this repository
-`git clone https://github.com/uppertoe/homelab.git`
+### Set environment variables
+```
+mv .env.example .env
+nano .env
+```
 
-# Docker
-### Install Docker
-`curl -sSL https://get.docker.com | sh`
+### Run the deploy script
+Use this to set a password for the web interface of each proxied service
 
-### Add the current user to the 'docker' group
-`sudo usermod -aG docker $USER`
+```
+chmod +x deploy.sh
+deploy.sh
+```
 
-### Restart the machine
-`sudo reboot`
+Use ctrl + o to save and ctrl + x to exit nano
 
 # Updating containers
 This pulls the latest Pihole, Nginx and Home Assistant containers:
 
-`docker compose pull`
+```
+docker compose pull
+```
 
 # Setting up DNS
 ### Get a static IP from your ISP

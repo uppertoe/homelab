@@ -83,3 +83,13 @@ sudo systemctl status fail2ban | grep "active (running)" || echo "Fail2Ban did n
 echo "System updates applied successfully!"
 echo "Firewall and Fail2Ban protections are in place!"
 echo "Unattended updates have been configured and enabled!"
+
+# Install Docker
+echo "Installing Docker and Docker Compose"
+curl -sSL https://get.docker.com | sh
+
+echo "Setting the Docker user"
+sudo usermod -aG docker $USER
+
+echo "Rebooting now!"
+sudo reboot

@@ -121,3 +121,5 @@ main() {
 
     log "Deployment completed successfully."
 }
+
+main
