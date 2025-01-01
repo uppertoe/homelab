@@ -12,7 +12,7 @@ generate_secret() {
 }
 
 # Path to the .tokens file
-TOKENS_FILE="../config/caddy/secrets/.tokens"
+TOKENS_FILE="$HOME/homelab/config/caddy/secrets/.tokens"
 
 # Backup extension for existing .tokens file
 BACKUP_EXT=".bak"
