@@ -16,7 +16,8 @@ services:
     container_name: unbound
     image: "klutchell/unbound:latest"
     networks:
-      - unbound-net
+      unbound-net:
+        ipv4_address: "${UNBOUND_STATIC_IP}"
     volumes:
       - "${DOCKER_CONFIG_PATH}/unbound:/etc/unbound/custom.conf.d:ro"
     restart: unless-stopped

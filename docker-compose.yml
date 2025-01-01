@@ -12,3 +12,6 @@ networks:
         - subnet: "${CADDY_NET_SUBNET}"
   unbound-net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: "${UNBOUND_NET_SUBNET}"

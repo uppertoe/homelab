@@ -2,6 +2,8 @@ services:
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
+    dns:
+      - "${UNBOUND_STATIC_IP}"
     environment:
       TZ: "${TZ}"
       WEBPASSWORD: "" # Auth by Caddy
