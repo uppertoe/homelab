@@ -24,9 +24,7 @@
 auth.{$DOMAIN} {
   route / {
     # Check if auth has been reached without a referer
-    @noCookie {
-        not cookie myreferer *
-    }
+    @noCookie not header Cookie myreferer=*
 
     handle @noCookie {
         respond "Access denied 2" 403 {
