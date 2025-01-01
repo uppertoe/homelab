@@ -7,6 +7,8 @@ services:
     restart: unless-stopped
     volumes:
       - redis:/data
+    networks:
+      - unbound-net
   
   unbound:
     container_name: unbound

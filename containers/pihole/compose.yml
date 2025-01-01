@@ -20,6 +20,4 @@ services:
       caddy-net:
         ipv4_address: "${PIHOLE_STATIC_IP}"
       unbound-net:
-        aliases:
-        - unbound
     restart: unless-stopped
