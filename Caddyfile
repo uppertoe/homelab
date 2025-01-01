@@ -32,15 +32,6 @@ auth.{$DOMAIN} {
         }
     }
 
-    # Rate limit requests
-    ratelimit {
-        zone admin_zone
-        key {remote_host}
-        rate 10r/m
-        burst 20
-        delay 100ms
-    }
-
     # require authentication
     import basic-auth
  
