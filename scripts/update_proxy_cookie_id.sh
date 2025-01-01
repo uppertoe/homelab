@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 # Script Name: update_proxy_cookie_id.sh
 # Description: Generates a secure 256-bit PROXY_COOKIE_ID, updates the .tokens
-#              environment file, manages backups older than 4 weeks, and reloads Caddy.
+#              environment file, manages backups older than 4 weeks.
 # -----------------------------------------------------------------------------
 
 # Function to generate a secure 256-bit (32-byte) secret in Base64
@@ -16,9 +16,6 @@ TOKENS_FILE="../config/caddy/secrets/.tokens"
 
 # Backup extension for existing .tokens file
 BACKUP_EXT=".bak"
-
-# Caddy service name for Docker Compose
-CADDY_SERVICE_NAME="caddy"
 
 # Function to update the .tokens file with the new PROXY_COOKIE_ID
 update_tokens_file() {
@@ -67,17 +64,6 @@ set_file_permissions() {
     echo "Set file permissions for $TOKENS_FILE to 600."
 }
 
-# Function to reload Caddy (Uncomment and configure if needed)
-reload_caddy() {
-    docker compose restart "$CADDY_SERVICE_NAME"
-    if [ $? -eq 0 ]; then
-        echo "Caddy service has been reloaded successfully."
-    else
-        echo "Failed to reload Caddy service."
-        exit 1
-    fi
-}
-
 # Main Execution
 
 # Generate a new secret
@@ -92,8 +78,5 @@ cleanup_old_backups
 
 # Set secure permissions on the .tokens file
 set_file_permissions
-
-# Reload Caddy to apply changes
-reload_caddy
 
 echo "PROXY_COOKIE_ID has been updated successfully."
