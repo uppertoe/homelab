@@ -91,13 +91,13 @@ install_dependencies() {
 
 run_scripts() {
     # Set the secret cookie that Caddy uses for auth
-    update_proxy_cookie_id.sh
+    ./update_proxy_cookie_id.sh
 
     # Ensure rotation of the Caddy secret
-    setup_cron.sh
+    ./setup_cron.sh
 
     # Requires user input for username and password
-    update_proxy_credentials.sh
+    ./update_proxy_credentials.sh
 }
 
 # Main Deployment Function
