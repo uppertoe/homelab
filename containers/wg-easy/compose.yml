@@ -6,7 +6,7 @@ services:
       - LANG=en
       # ⚠️ Required:
       # Change this to your host's public address
-      - WG_HOST="vpn.${DOMAIN}"
+      - WG_HOST=vpn.${DOMAIN}
 
       # Optional:
       # - PASSWORD_HASH=$$2y$$10$$hBCoykrB95WSzuV4fafBzOHWKu9sbyVa34GJr8VV5R/pIelfEMYyG # (needs double $$, hash of 'foobar123'; see "How_to_generate_an_bcrypt_hash.md" for generate the hash)
@@ -14,7 +14,7 @@ services:
       # - WG_PORT=51820
       # - WG_CONFIG_PORT=92820
       # - WG_DEFAULT_ADDRESS=10.8.0.x
-      - WG_DEFAULT_DNS="${PIHOLE_STATIC_IP}"
+      - WG_DEFAULT_DNS=${PIHOLE_STATIC_IP}
       # - WG_MTU=1420
       # - WG_ALLOWED_IPS=192.168.15.0/24, 10.0.1.0/24
       # - WG_PERSISTENT_KEEPALIVE=25
