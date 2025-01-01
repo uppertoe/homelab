@@ -91,5 +91,9 @@ curl -sSL https://get.docker.com | sh
 echo "Setting the Docker user"
 sudo usermod -aG docker $USER
 
+# Set up VM overcommit memory for Redis
+echo "vm.overcommit_memory = 1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
 echo "Rebooting now!"
 sudo reboot
