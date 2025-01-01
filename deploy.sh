@@ -89,12 +89,6 @@ install_dependencies() {
     fi
 }
 
-make_executable() {
-    # Make scripts executable
-    chmod +x "${SCRIPT_DIR}/"*.sh
-    log "Set executable permissions on scripts."
-}
-
 run_scripts() {
     # Set the secret cookie that Caddy uses for auth
     ${SCRIPT_DIR}/update_proxy_cookie_id.sh
@@ -113,10 +107,7 @@ main() {
     # Step 1: Check and install dependencies
     install_dependencies
 
-    # Step 2: Make scripts executable
-    make_executable
-
-    # Step 3: Run deployment scripts
+    # Step 2: Run deployment scripts
     run_scripts
 
     log "Deployment completed successfully."
