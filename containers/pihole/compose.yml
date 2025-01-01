@@ -8,6 +8,7 @@ services:
       TZ: "${TZ}"
       WEBPASSWORD: "" # Auth by Caddy
       PIHOLE_DNS_: unbound
+      CUSTOM_CACHE_SIZE: "0"  # Allow unbound to handle
     ports:
       - "53:53/tcp"
       - "53:53/udp"
