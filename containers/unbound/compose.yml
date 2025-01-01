@@ -2,13 +2,11 @@ services:
   unbound:
     container_name: unbound
     image: "mvance/unbound:latest"
-    expose:
-      - "53"
     networks:
       - unbound-net
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+      - "1153:53/tcp"
+      - "1153:53/udp"
     volumes:
       - "${DOCKER_CONFIG_PATH}/unbound/forward-records.conf:/opt/unbound/etc/unbound/forward-records.conf"
       - "${DOCKER_CONFIG_PATH}/unbound/a-records.conf:/opt/unbound/etc/unbound/a-records.conf"

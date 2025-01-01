@@ -2,7 +2,7 @@ include:
   - containers/caddy/compose.yml
   - containers/pihole/compose.yml
   - containers/wg-easy/compose.yml
-  #- containers/unbound/compose.yml
+  - containers/unbound/compose.yml
 
 networks:
   caddy-net:
