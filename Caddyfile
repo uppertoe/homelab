@@ -37,9 +37,7 @@ auth.example.com {
   }
  
   # fallback
-  respond "Access denied" 403 {
-		close
-	}
+  respond "Please retry authentication"
 
 }
 
