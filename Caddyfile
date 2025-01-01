@@ -69,3 +69,9 @@ wireguard.{$DOMAIN} {
     import proxy-auth
     reverse_proxy wg-easy:51821
 }
+
+# Homeassistant Web Interface
+homeassistant.{$DOMAIN} {
+    import proxy-auth
+    reverse_proxy wg-easy:8123
+}
