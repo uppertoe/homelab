@@ -23,6 +23,17 @@
 # a pseudo site that only requires basic auth, sets cookie, and redirects back to original site
 auth.{$DOMAIN} {
   route / {
+    # Check if auth has been reached without a referer
+    @noCookie {
+        not cookie myreferer *
+    }
+
+    handle @noCookie {
+        respond "Access denied 2" 403 {
+            close
+        }
+    }
+
     # require authentication
     import basic-auth
  
