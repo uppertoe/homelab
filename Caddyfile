@@ -4,7 +4,7 @@
 }
 
 (basic-auth) {
-  basicauth / {
+  basic_auth / {
     {$PROXY_USERNAME} {$PROXY_PASSWORD_HASHED}
   }
 }
@@ -12,9 +12,7 @@
 # A snippet to check if a cookie token is set. if not, store the current page as the referer and redirect to auth site
 (proxy-auth) {
     # if cookie not = some-token-nonsense
-    @no-auth {
     @no-auth not header Cookie *myid={$PROXY_COOKIE_ID}*
-    }
 
     handle @no-auth {
         header Set-Cookie "myreferer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Strict; Secure"
