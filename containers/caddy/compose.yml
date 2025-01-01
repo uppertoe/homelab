@@ -7,6 +7,7 @@ services:
       - "${DOCKER_CONFIG_PATH}/caddy/secrets/.tokens"
     environment:
       CADDY_EMAIL: "${CADDY_EMAIL}"
+      DOMAIN: "${DOMAIN}"
     ports:
       - "80:80"    # HTTP
       - "443:443"  # HTTPS
