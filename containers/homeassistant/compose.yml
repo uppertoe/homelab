@@ -6,8 +6,6 @@ services:
       - ${DOCKER_CONFIG_PATH}/homeassistant:/config
       - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
-    ports:
-      - "8123:8123"
     restart: unless-stopped
     privileged: true
     networks:
