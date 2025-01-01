@@ -27,16 +27,25 @@ auth.{$DOMAIN} {
     @noCookie not header Cookie myreferer=*
 
     handle @noCookie {
-        respond "Access denied 2" 403 {
+        respond "Forbidden: This route may only be used for redirects" 403 {
             close
         }
+    }
+
+    # Rate limit requests
+    ratelimit {
+        zone admin_zone
+        key {remote_host}
+        rate 10r/m
+        burst 20
+        delay 100ms
     }
 
     # require authentication
     import basic-auth
  
     # upon successful auth, set a client token
-    header Set-Cookie "myid={$PROXY_COOKIE_ID}; Domain={$DOMAIN}; Path=/; Max-Age=3600; HttpOnly; SameSite=Strict; Secure"
+    header Set-Cookie "myid={$PROXY_COOKIE_ID}; Domain={$DOMAIN}; Path=/; Max-Age={$CADDY_LOGIN_TIMEOUT}; HttpOnly; SameSite=Strict; Secure"
      
     #delete the referer cookie
     header +Set-Cookie "myreferer=null; Domain={$DOMAIN}; Path=/; Expires=Thu, 25 Sep 1971 12:00:00 GMT; HttpOnly; SameSite=Strict; Secure"
@@ -59,4 +68,10 @@ pihole.{$DOMAIN} {
     
     @root path /
     redir @root /admin 301
+}
+
+# Wireguard-easy Web Interface
+wireguard.{$DOMAIN} {
+    import proxy-auth
+    reverse_proxy wg-easy:51821
 }
