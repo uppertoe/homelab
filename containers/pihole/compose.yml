@@ -3,8 +3,7 @@ services:
     container_name: pihole
     image: pihole/pihole:latest
     dns:
-      - "1.1.1.1"
-      - "8.8.8.8"
+      - "unbound"
     environment:
       TZ: "${TZ}"
       WEBPASSWORD: "" # Auth by Caddy
@@ -21,4 +20,5 @@ services:
     networks:
       caddy-net:
         ipv4_address: "${PIHOLE_STATIC_IP}"
+      unbound-net:
     restart: unless-stopped

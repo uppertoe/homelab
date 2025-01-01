@@ -1,6 +1,5 @@
 {
     email {$CADDY_EMAIL}
-    debug
 }
 
 (basic-auth) {
@@ -51,6 +50,10 @@ auth.{$DOMAIN} {
 	}
 
 }
+
+#########################
+#------Local Routes-----#
+#########################
 
 # Pi-hole Admin Interface
 pihole.{$DOMAIN} {
