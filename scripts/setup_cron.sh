@@ -20,7 +20,7 @@ if ! command_exists crontab; then
 fi
 
 # Path to the directory containing this script
-PROJECT_DIR="../"
+PROJECT_DIR=".."
 
 # Path to the .env file (one level up from SCRIPTS)
 ENV_FILE="$PROJECT_DIR/.env"
