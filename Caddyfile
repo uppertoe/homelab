@@ -16,7 +16,7 @@
     @fail-auth-current not header Cookie *myid={$PROXY_COOKIE_ID}*
 
     # Check old credential
-    @fail-auth-previous not header Cookie *myid={$PROXY_COOKIE_ID_PREVIOUS}
+    @fail-auth-previous not header Cookie *myid={$PROXY_COOKIE_ID_PREVIOUS}*
 
     # If not authenticated, redirect to auth
     handle @fail-auth-current {
