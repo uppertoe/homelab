@@ -77,6 +77,7 @@ fi
 ABS_UPDATE_SCRIPT=$(readlink -f "$UPDATE_SCRIPT" || true)
 ABS_DOCKER_BIN=$(readlink -f "$DOCKER_BIN" || true)
 ABS_BASE_DOCKER_COMPOSE_YML=$(readlink -f "$PROJECT_DIR/$BASE_DOCKER_COMPOSE_YML" || true)
+ABS_CRON_LOG_FILE=$(readlink -f "$CRON_LOG_FILE" || true)
 
 # Verify that readlink worked
 if [ -z "$ABS_UPDATE_SCRIPT" ] || [ -z "$ABS_DOCKER_BIN" ] || [ -z "$ABS_BASE_DOCKER_COMPOSE_YML" ]; then
@@ -97,7 +98,7 @@ if [ ! -f "$ABS_BASE_DOCKER_COMPOSE_YML" ]; then
 fi
 
 # Construct the cron job command
-CRON_COMMAND="$ROTATE_CREDS_CRON_SCHEDULE /bin/bash $ABS_UPDATE_SCRIPT && $ABS_DOCKER_BIN compose -f $ABS_BASE_DOCKER_COMPOSE_YML up -d caddy >> $CRON_LOG_FILE 2>&1"
+CRON_COMMAND="$ROTATE_CREDS_CRON_SCHEDULE /bin/bash $ABS_UPDATE_SCRIPT && $ABS_DOCKER_BIN compose -f $ABS_BASE_DOCKER_COMPOSE_YML up -d caddy >> $ABS_CRON_LOG_FILE 2>&1"
 
 # Check if the cron job already exists
 (crontab -l 2>/dev/null | grep -F "$ABS_UPDATE_SCRIPT") && EXISTS=true || EXISTS=false
