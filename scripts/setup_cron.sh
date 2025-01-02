@@ -97,7 +97,7 @@ if [ ! -f "$ABS_BASE_DOCKER_COMPOSE_YML" ]; then
 fi
 
 # Construct the cron job command
-CRON_COMMAND="$ROTATE_CREDS_CRON_SCHEDULE /bin/bash $ABS_UPDATE_SCRIPT && $ABS_DOCKER_BIN compose -f $ABS_BASE_DOCKER_COMPOSE_YML restart caddy >> $CRON_LOG_FILE 2>&1"
+CRON_COMMAND="$ROTATE_CREDS_CRON_SCHEDULE /bin/bash $ABS_UPDATE_SCRIPT && $ABS_DOCKER_BIN compose -f $ABS_BASE_DOCKER_COMPOSE_YML up -d caddy >> $CRON_LOG_FILE 2>&1"
 
 # Check if the cron job already exists
 (crontab -l 2>/dev/null | grep -F "$ABS_UPDATE_SCRIPT") && EXISTS=true || EXISTS=false
