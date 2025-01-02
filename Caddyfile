@@ -21,7 +21,7 @@
     # If not authenticated, redirect to auth
     handle @fail-auth-current {
         
-        handle @fail-auth-previous{
+        handle @fail-auth-previous {
             header Set-Cookie "myreferer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Strict; Secure"
             redir https://auth.{$DOMAIN}
         }
