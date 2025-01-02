@@ -5,7 +5,7 @@ services:
     env_file:
       - "${DOCKER_CONFIG_PATH}/caddy/secrets/.hashes"
       - "${DOCKER_CONFIG_PATH}/caddy/secrets/.tokens"
-    environment:
+    environment:  # Pass variables from the base compose
       CADDY_EMAIL: "${CADDY_EMAIL}"
       CADDY_LOGIN_TIMEOUT: "${CADDY_LOGIN_TIMEOUT}"
       DOMAIN: "${DOMAIN}"
@@ -13,7 +13,7 @@ services:
       - "80:80"    # HTTP
       - "443:443"  # HTTPS
     networks:
-      - caddy-net
+      - proxy-net
     volumes:
       - "${CADDYFILE_PATH}:/etc/caddy/Caddyfile:ro"
       - "${DOCKER_CONFIG_PATH}/caddy/caddy_data:/data"

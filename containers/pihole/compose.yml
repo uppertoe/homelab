@@ -19,9 +19,9 @@ services:
       - "${DOCKER_CONFIG_PATH}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
       - "${DOCKER_CONFIG_PATH}/pihole/etc-lighttpd/external.conf:/etc/lighttpd/external.conf"
     networks:
-      caddy-net:
+      proxy-net:
         ipv4_address: "${PIHOLE_STATIC_IP}"
-      unbound-net:
+      private-net:
     restart: unless-stopped
     depends_on:
       - unbound

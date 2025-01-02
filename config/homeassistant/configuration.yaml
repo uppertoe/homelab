@@ -5,4 +5,4 @@ default_config:
 http:
   use_x_forwarded_for: true
   trusted_proxies:
-    - !env_var CADDY_NET_SUBNET
+    - !env_var PROXY_NET_SUBNET

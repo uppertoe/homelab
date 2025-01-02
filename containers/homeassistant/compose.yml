@@ -3,7 +3,8 @@ services:
     container_name: homeassistant
     image: "ghcr.io/home-assistant/home-assistant:stable"
     environment:
-      CADDY_NET_SUBNET: "${CADDY_NET_SUBNET}"
+      # Tell Homeassistant configuration.yaml to allow proxy traffic
+      PROXY_NET_SUBNET: "${PROXY_NET_SUBNET}"
     volumes:
       - ${DOCKER_CONFIG_PATH}/homeassistant:/config
       - /etc/localtime:/etc/localtime:ro
@@ -11,4 +12,4 @@ services:
     restart: unless-stopped
     privileged: true
     networks:
-      - caddy-net
+      - proxy-net

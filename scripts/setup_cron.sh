@@ -6,6 +6,8 @@
 #              .tokens.bak files by running update_proxy_cookie_id.sh.
 # -----------------------------------------------------------------------------
 
+set -euo pipefail  # Enable strict error handling
+
 # Function to check if a command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
@@ -17,38 +19,96 @@ if ! command_exists crontab; then
     exit 1
 fi
 
-# Path to the update_proxy_cookie_id.sh script
+# Path to the directory containing this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-UPDATE_SCRIPT="${SCRIPT_DIR}/update_proxy_cookie_id.sh"
 
-# Ensure the update script exists
-if [ ! -f "$UPDATE_SCRIPT" ]; then
-    echo "Error: $UPDATE_SCRIPT does not exist. Please ensure the script is in the correct location."
+# Path to the .env file (one level up from SCRIPTS)
+ENV_FILE="$(dirname "$SCRIPT_DIR")/.env"
+
+# Verify that the .env file exists
+if [ ! -f "$ENV_FILE" ]; then
+    echo "$(date) - ERROR: .env file not found at $ENV_FILE" >&2
     exit 1
 fi
 
-# Absolute path to the update script
-ABS_UPDATE_SCRIPT=$(readlink -f "$UPDATE_SCRIPT")
+# Source the .env file
+source "$ENV_FILE"
 
-# Log file path
-LOG_FILE="${SCRIPT_DIR}/update_proxy_cookie_id_cron.log"
+# Verify that required variables are set
+: "${ROTATE_CREDS_CRON_SCHEDULE:?Environment variable CRON_SCHEDULE not set}"
+: "${DOCKER_BIN:?Environment variable DOCKER_BIN not set}"
+: "${BASE_DOCKER_COMPOSE_YML:?Environment variable BASE_DOCKER_COMPOSE_YML not set}"
 
-# Cron job schedule: Every Sunday at 3:00 AM
-CRON_SCHEDULE="0 3 * * 0"
+# Set up logs
+LOGS_DIR="$(dirname "$SCRIPT_DIR")/logs"
+mkdir -p "$LOGS_DIR"
 
-# Cron job command
-CRON_COMMAND="$CRON_SCHEDULE $ABS_UPDATE_SCRIPT >> $LOG_FILE 2>&1"
+# Verify that the logs directory was created
+if [ ! -d "$LOGS_DIR" ]; then
+    echo "$(date) - ERROR: Logs directory $LOGS_DIR was not created." >&2
+    exit 1
+fi
+
+CRON_LOG_FILE="${LOGS_DIR}/update_proxy_cookie_id_cron.log"
+SCRIPT_LOG_FILE="${LOGS_DIR}/update_proxy_cookie_id_deploy.log"
+
+# Ensure the log files exist
+touch "$CRON_LOG_FILE" "$SCRIPT_LOG_FILE"
+
+# Set appropriate permissions
+chmod 700 "$LOGS_DIR"
+chmod 600 "$CRON_LOG_FILE" "$SCRIPT_LOG_FILE"
+
+# Path to the update_proxy_cookie_id.sh script
+UPDATE_SCRIPT="${SCRIPT_DIR}/update_proxy_cookie_id.sh"
+
+# Ensure the update script exists and is executable
+if [ ! -f "$UPDATE_SCRIPT" ]; then
+    echo "$(date) - ERROR: $UPDATE_SCRIPT does not exist. Please ensure the script is in the correct location." >> "$SCRIPT_LOG_FILE"
+    exit 1
+fi
+
+if [ ! -x "$UPDATE_SCRIPT" ]; then
+    echo "$(date) - INFO: Making $UPDATE_SCRIPT executable." >> "$SCRIPT_LOG_FILE"
+    chmod +x "$UPDATE_SCRIPT"
+fi
+
+# Resolve absolute paths
+ABS_UPDATE_SCRIPT=$(readlink -f "$UPDATE_SCRIPT" || true)
+ABS_DOCKER_BIN=$(readlink -f "$DOCKER_BIN" || true)
+ABS_BASE_DOCKER_COMPOSE_YML=$(readlink -f "$(dirname "$BASE_DOCKER_COMPOSE_YML")" || true)
+
+# Verify that readlink worked
+if [ -z "$ABS_UPDATE_SCRIPT" ] || [ -z "$ABS_DOCKER_BIN" ] || [ -z "$ABS_BASE_DOCKER_COMPOSE_YML" ]; then
+    echo "$(date) - ERROR: Failed to resolve absolute paths." >> "$SCRIPT_LOG_FILE"
+    exit 1
+fi
+
+# Ensure Docker executable is valid
+if [ ! -x "$ABS_DOCKER_BIN" ]; then
+    echo "$(date) - ERROR: Docker executable not found or not executable at $ABS_DOCKER_BIN" >> "$SCRIPT_LOG_FILE"
+    exit 1
+fi
+
+# Ensure docker-compose.yml exists
+if [ ! -f "$ABS_BASE_DOCKER_COMPOSE_YML" ]; then
+    echo "$(date) - ERROR: Docker Compose YAML file not found at $ABS_BASE_DOCKER_COMPOSE_YML" >> "$SCRIPT_LOG_FILE"
+    exit 1
+fi
+
+# Construct the cron job command
+CRON_COMMAND="$CRON_SCHEDULE /bin/bash $ABS_UPDATE_SCRIPT && $ABS_DOCKER_BIN compose -f $ABS_BASE_DOCKER_COMPOSE_YML restart caddy >> $CRON_LOG_FILE 2>&1"
 
 # Check if the cron job already exists
-(crontab -l | grep -F "$ABS_UPDATE_SCRIPT") && EXISTS=true || EXISTS=false
+(crontab -l 2>/dev/null | grep -F "$ABS_UPDATE_SCRIPT") && EXISTS=true || EXISTS=false
 
 if [ "$EXISTS" = true ]; then
-    echo "Cron job already exists. No changes made."
+    echo "$(date) - Cron job already exists. No changes made." >> "$SCRIPT_LOG_FILE"
 else
     # Add the cron job
     (crontab -l 2>/dev/null; echo "$CRON_COMMAND") | crontab -
-    echo "Cron job added successfully:"
-    echo "$CRON_COMMAND"
+    echo "$(date) - Cron job added successfully:" >> "$SCRIPT_LOG_FILE"
+    echo "$CRON_COMMAND" >> "$SCRIPT_LOG_FILE"
 fi
 
-echo "Setup complete."
+echo "$(date) - Setup complete." >> "$SCRIPT_LOG_FILE"

@@ -8,25 +8,44 @@
   }
 }
 
-# A snippet to check if a cookie token is set. if not, store the current page as the referer and redirect to auth site
+# Check whether a valid authorisation cookie exists
 (proxy-auth) {
-    # if cookie not = some-token-nonsense
-    @no-auth not header Cookie *myid={$PROXY_COOKIE_ID}*
 
-    handle @no-auth {
-        header Set-Cookie "myreferer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Strict; Secure"
-        redir https://auth.{$DOMAIN}
+    # Check credentials
+    # *variable* performs a fast substring match
+    @fail-auth-current not header Cookie *myid={$PROXY_COOKIE_ID}*
+
+    # Check old credential
+    @fail-auth-previous not header Cookie *myid={$PROXY_COOKIE_ID_PREVIOUS}
+
+    # If not authenticated, redirect to auth
+    handle @fail-auth-current {
+        
+        handle @fail-auth-previous{
+            header Set-Cookie "myreferer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Strict; Secure"
+            redir https://auth.{$DOMAIN}
+        }
+
     }
 }
 
-# a pseudo site that only requires basic auth, sets cookie, and redirects back to original site
+# Store the referring site, perform authentication, and 
 auth.{$DOMAIN} {
   route / {
     # Check if auth has been reached without a referer
-    @noCookie not header Cookie myreferer=*
+    @no-cookie not header Cookie *myreferer=*
 
-    handle @noCookie {
-        respond "Forbidden: This route may only be used for redirects" 403 {
+    handle @no-cookie {
+        respond "Forbidden: This route requires a referer" 403 {
+            close
+        }
+    }
+
+    # Check that the referer is valid
+    @invalid-referer not header_regexp Cookie (^|; )myreferer=https://([a-zA-Z0-9-]+\.)*{$DOMAIN//./\\.}(/.*)?(;|$)
+
+    handle @invalid-referer {
+        respond "Forbidden: Invalid referer" 403 {
             close
         }
     }
@@ -38,7 +57,7 @@ auth.{$DOMAIN} {
     header Set-Cookie "myid={$PROXY_COOKIE_ID}; Domain={$DOMAIN}; Path=/; Max-Age={$CADDY_LOGIN_TIMEOUT}; HttpOnly; SameSite=Strict; Secure"
      
     #delete the referer cookie
-    header +Set-Cookie "myreferer=null; Domain={$DOMAIN}; Path=/; Expires=Thu, 25 Sep 1971 12:00:00 GMT; HttpOnly; SameSite=Strict; Secure"
+    header +Set-Cookie "myreferer=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Strict; Secure"
      
     # redirect back to the original site
     redir {http.request.cookie.myreferer}

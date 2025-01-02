@@ -6,13 +6,13 @@ include:
   - containers/homeassistant/compose.yml
 
 networks:
-  caddy-net:
+  proxy-net:
     driver: bridge
     ipam:
       config:
-        - subnet: "${CADDY_NET_SUBNET}"
-  unbound-net:
+        - subnet: "${PROXY_NET_SUBNET}"
+  private-net:
     driver: bridge
     ipam:
       config:
-        - subnet: "${UNBOUND_NET_SUBNET}"
+        - subnet: "${PRIVATE_NET_SUBNET}"
