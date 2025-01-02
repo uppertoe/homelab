@@ -1,7 +1,13 @@
+# =============================
+# Global configuration
+# =============================
 {
     email {$CADDY_EMAIL}
 }
 
+# =============================
+# Snippets
+# =============================
 (basic-auth) {
   basic_auth / {
     {$PROXY_USERNAME} {$PROXY_PASSWORD_HASHED}
@@ -14,20 +20,18 @@
     # Check credentials
     # *variable* performs a fast substring match
     @fail-auth-current not header Cookie *myid={$PROXY_COOKIE_ID}*
-
-    # Check old credential
     @fail-auth-previous not header Cookie *myid={$PROXY_COOKIE_ID_PREVIOUS}*
 
     # If not authenticated, redirect to auth
-    handle @fail-auth-current {
-        
-        handle @fail-auth-previous {
-            header Set-Cookie "myreferer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Strict; Secure"
-            redir https://auth.{$DOMAIN}
-        }
-
+    handle @fail-auth-current @fail-auth-previous {
+        header Set-Cookie "myreferer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Strict; Secure"
+        redir https://auth.{$DOMAIN}
     }
 }
+
+# =============================
+# Site blocks
+# =============================
 
 # Store the referring site, perform authentication, and 
 auth.{$DOMAIN} {
@@ -37,15 +41,6 @@ auth.{$DOMAIN} {
 
     handle @no-cookie {
         respond "Forbidden: This route requires a referer" 403 {
-            close
-        }
-    }
-
-    # Check that the referer is valid
-    @invalid-referer not header_regexp Cookie (^|; )myreferer=https://([a-zA-Z0-9-]+\.)*{$DOMAIN//./\\.}(/.*)?(;|$)
-
-    handle @invalid-referer {
-        respond "Forbidden: Invalid referer" 403 {
             close
         }
     }
