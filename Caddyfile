@@ -25,7 +25,7 @@
     # If not authenticated, redirect to auth
     handle @fail-auth-current {
         handle @fail-auth-previous {
-            header Set-Cookie "myreferer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Strict; Secure"
+            header Set-Cookie "myreferer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Lax; Secure"
             redir https://auth.{$DOMAIN}
         }
     } 
@@ -51,10 +51,10 @@ auth.{$DOMAIN} {
     import basic-auth
  
     # upon successful auth, set a client token
-    header Set-Cookie "myid={$PROXY_COOKIE_ID}; Domain={$DOMAIN}; Path=/; Max-Age={$CADDY_LOGIN_TIMEOUT}; HttpOnly; SameSite=Strict; Secure"
+    header Set-Cookie "myid={$PROXY_COOKIE_ID}; Domain={$DOMAIN}; Path=/; Max-Age={$CADDY_LOGIN_TIMEOUT}; HttpOnly; SameSite=Lax; Secure"
      
     #delete the referer cookie
-    header +Set-Cookie "myreferer=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Strict; Secure"
+    header +Set-Cookie "myreferer=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
      
     # redirect back to the original site
     redir {http.request.cookie.myreferer}
