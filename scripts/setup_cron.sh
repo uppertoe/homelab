@@ -6,7 +6,7 @@
 #              .tokens.bak files by running update_proxy_cookie_id.sh.
 # -----------------------------------------------------------------------------
 
-set -euo pipefail  # Enable strict error handling
+set -e
 
 # Function to check if a command exists
 command_exists() {
@@ -20,10 +20,10 @@ if ! command_exists crontab; then
 fi
 
 # Path to the directory containing this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Path to the .env file (one level up from SCRIPTS)
-ENV_FILE="$(dirname "$SCRIPT_DIR")/.env"
+ENV_FILE="./.env"
 
 # Verify that the .env file exists
 if [ ! -f "$ENV_FILE" ]; then
@@ -40,7 +40,7 @@ source "$ENV_FILE"
 : "${BASE_DOCKER_COMPOSE_YML:?Environment variable BASE_DOCKER_COMPOSE_YML not set}"
 
 # Set up logs
-LOGS_DIR="$(dirname "$SCRIPT_DIR")/logs"
+LOGS_DIR="./logs"
 mkdir -p "$LOGS_DIR"
 
 # Verify that the logs directory was created
@@ -60,7 +60,7 @@ chmod 700 "$LOGS_DIR"
 chmod 600 "$CRON_LOG_FILE" "$SCRIPT_LOG_FILE"
 
 # Path to the update_proxy_cookie_id.sh script
-UPDATE_SCRIPT="${SCRIPT_DIR}/update_proxy_cookie_id.sh"
+UPDATE_SCRIPT="./scripts/update_proxy_cookie_id.sh"
 
 # Ensure the update script exists and is executable
 if [ ! -f "$UPDATE_SCRIPT" ]; then
@@ -76,7 +76,7 @@ fi
 # Resolve absolute paths
 ABS_UPDATE_SCRIPT=$(readlink -f "$UPDATE_SCRIPT" || true)
 ABS_DOCKER_BIN=$(readlink -f "$DOCKER_BIN" || true)
-ABS_BASE_DOCKER_COMPOSE_YML=$(readlink -f "$(dirname "$BASE_DOCKER_COMPOSE_YML")" || true)
+ABS_BASE_DOCKER_COMPOSE_YML=$(readlink -f "./$BASE_DOCKER_COMPOSE_YML" || true)
 
 # Verify that readlink worked
 if [ -z "$ABS_UPDATE_SCRIPT" ] || [ -z "$ABS_DOCKER_BIN" ] || [ -z "$ABS_BASE_DOCKER_COMPOSE_YML" ]; then
