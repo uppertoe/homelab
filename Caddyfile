@@ -24,12 +24,17 @@
         header Cookie *proxy-id={$PROXY_COOKIE_ID_PREVIOUS}*
     }
 
-    # If not authenticated, redirect to auth
-    handle not @pass-auth {
+    # If not authenticated, continue
+    handle @pass-auth {
+    } 
+
+    # Otherwise, redirect to auth
+    handle {
         header Set-Cookie "proxy-referer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Lax; Secure"
         header +Set-Cookie "proxy-id=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
         redir https://auth.{$DOMAIN}
-    } 
+    }
+
 }
 
 # =============================
