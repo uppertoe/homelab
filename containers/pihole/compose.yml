@@ -9,11 +9,12 @@ services:
       WEBPASSWORD: "" # Auth by Caddy
       PIHOLE_DNS_: unbound
       CUSTOM_CACHE_SIZE: "0"  # Allow unbound to handle
+      DNSMASQ_LISTENING: "all"  # Allow VPN access to pihole
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "853:853/tcp"
-      - "8081:80/tcp"
+      - "53:53/tcp" # DNS resolution
+      - "53:53/udp" # DNS resolution
+      - "853:853/tcp" # DNS over TLS
+      # - "8081:80/tcp"  # Web interface managed by Caddy
     volumes:
       - "${DOCKER_CONFIG_PATH}/pihole/etc-pihole:/etc/pihole"
       - "${DOCKER_CONFIG_PATH}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
