@@ -4,7 +4,15 @@ Follow the instructions on the [Raspberry Pi website](https://www.raspberrypi.co
 
 ### Set up SSH keys
 Run the `scripts/setup_remote_ssh.sh` script on the remote computer
-- Remember to set the RPi's IP and username in the script before running
+- Use ctrl + o to save and ctrl + x to exit nano
+
+```
+# Set the RPi's IP and username as variables in the script
+nano scripts/setup_remote_ssh.sh
+
+# Run the script to create connection credentials
+bash scripts/setup_remote_ssh.sh
+```
 
 Use the resulting connect.sh to SSH in to the RPi
 
@@ -31,6 +39,7 @@ Note that SSH login with password authentication will no longer be possible
 mv .env.example .env
 nano .env
 ```
+- Use ctrl + o to save and ctrl + x to exit nano
 
 ### Run the deploy script
 Use this to set a password for the web interface of each proxied service
@@ -39,8 +48,6 @@ Use this to set a password for the web interface of each proxied service
 chmod +x deploy.sh
 deploy.sh
 ```
-
-Use ctrl + o to save and ctrl + x to exit nano
 
 # Updating containers
 This pulls the latest Pihole, Nginx and Home Assistant containers:
@@ -62,3 +69,9 @@ Simply send the wildcard apex domain * to the static IP; the reverse proxy will 
 | HTTP | 80 | 192.168.4.48 | 80 | TCP |
 | HTTPS | 443 | 192.168.4.48 | 443 | TCP |
 | Wireguard VPN | 51820 | 192.168.4.48 | 51820 | UDP |
+
+# Specific services
+
+### Wireguard-Easy
+The client VPN can be configured to forward only DNS requests:
+- Set *Allowed IPs* to the Pihole static IP (eg 10.2.1.200/32)
