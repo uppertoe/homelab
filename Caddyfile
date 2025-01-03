@@ -97,3 +97,9 @@ homeassistant.{$DOMAIN} {
     import proxy-auth
     reverse_proxy homeassistant:8123
 }
+
+# Flame Dashboard
+{$DOMAIN} {
+    import proxy-auth
+    reverse_proxy flame:5005
+}

@@ -1,0 +1,11 @@
+# https://github.com/pawelmalak/flame
+services:
+  flame:
+    image: pawelmalak/flame
+    container_name: flame
+    volumes:
+      - ${DOCKER_CONFIG_PATH}/flame:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock # optional but required for Docker integration
+    restart: unless-stopped
+    networks:
+      - proxy-net
