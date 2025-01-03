@@ -19,15 +19,16 @@
 
     # Check credentials
     # *variable* performs a fast substring match
-    @fail-auth-current not header Cookie *proxy-id={$PROXY_COOKIE_ID}*
-    @fail-auth-previous not header Cookie *proxy-id={$PROXY_COOKIE_ID_PREVIOUS}*
+    @pass-auth {  # Matches OR
+        header Cookie *proxy-id={$PROXY_COOKIE_ID}*
+        header Cookie *proxy-id={$PROXY_COOKIE_ID_PREVIOUS}*
+    }
 
     # If not authenticated, redirect to auth
-    handle @fail-auth-current {
-        handle @fail-auth-previous {
-            header Set-Cookie "proxy-referer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Lax; Secure"
-            redir https://auth.{$DOMAIN}
-        }
+    handle not @pass-auth {
+        header Set-Cookie "proxy-referer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Lax; Secure"
+        header +Set-Cookie "proxy-id=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
+        redir https://auth.{$DOMAIN}
     } 
 }
 
