@@ -120,5 +120,8 @@ fi
 sudo systemctl restart systemd-journald
 echo "systemd-journald service restarted to apply changes."
 
+# Enable memory reporting from Docker
+sudo sed -i 's/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/' /boot/firmware/cmdline.txt
+
 echo "Rebooting now!"
 sudo reboot
