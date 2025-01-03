@@ -1,7 +1,7 @@
 # https://github.com/pawelmalak/flame
 services:
   flame:
-    image: pawelmalak/flame
+    image: pawelmalak/flame:multiarch
     container_name: flame
     volumes:
       - ${DOCKER_CONFIG_PATH}/flame:/app/data
