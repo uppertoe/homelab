@@ -2,39 +2,38 @@
 # Global configuration
 # =============================
 {
-    email {$CADDY_EMAIL}
+	email {$CADDY_EMAIL}
 }
 
 # =============================
 # Snippets
 # =============================
 (basic-auth) {
-  basic_auth / {
-    {$PROXY_USERNAME} {$PROXY_PASSWORD_HASHED}
-  }
+	basic_auth / {
+		{$PROXY_USERNAME} {$PROXY_PASSWORD_HASHED}
+	}
 }
 
 # Check whether a valid authorisation cookie exists
 (proxy-auth) {
+	# Check credentials
+	# *variable* performs a fast substring match
+	@pass-auth {
+		# Matches OR
+		header Cookie *proxy-id={$PROXY_COOKIE_ID}*
+		header Cookie *proxy-id={$PROXY_COOKIE_ID_PREVIOUS}*
+	}
 
-    # Check credentials
-    # *variable* performs a fast substring match
-    @pass-auth {  # Matches OR
-        header Cookie *proxy-id={$PROXY_COOKIE_ID}*
-        header Cookie *proxy-id={$PROXY_COOKIE_ID_PREVIOUS}*
-    }
+	# If not authenticated, continue
+	handle @pass-auth {
+	}
 
-    # If not authenticated, continue
-    handle @pass-auth {
-    } 
-
-    # Otherwise, redirect to auth
-    handle {
-        header Set-Cookie "proxy-referer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Lax; Secure"
-        header +Set-Cookie "proxy-id=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
-        redir https://auth.{$DOMAIN}
-    }
-
+	# Otherwise, redirect to auth
+	handle {
+		header Set-Cookie "proxy-referer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Lax; Secure"
+		header +Set-Cookie "proxy-id=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
+		redir https://auth.{$DOMAIN}
+	}
 }
 
 # =============================
@@ -43,34 +42,33 @@
 
 # Store the referring site, perform authentication, and 
 auth.{$DOMAIN} {
-  route / {
-    # Check if auth has been reached without a referer
-    @no-cookie not header Cookie *proxy-referer=*
+	route / {
+		# Check if auth has been reached without a referer
+		@no-cookie not header Cookie *proxy-referer=*
 
-    handle @no-cookie {
-        respond "Forbidden: This route requires a referer" 403 {
-            close
-        }
-    }
+		handle @no-cookie {
+			respond "Forbidden: This route requires a referer" 403 {
+				close
+			}
+		}
 
-    # require authentication
-    import basic-auth
- 
-    # upon successful auth, set a client token
-    header Set-Cookie "proxy-id={$PROXY_COOKIE_ID}; Domain={$DOMAIN}; Path=/; Max-Age={$CADDY_LOGIN_TIMEOUT}; HttpOnly; SameSite=Lax; Secure"
-     
-    #delete the referer cookie
-    header +Set-Cookie "proxy-referer=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
-     
-    # redirect back to the original site
-    redir {http.request.cookie.proxy-referer}
-  }
- 
-  # fallback
-  respond "Access denied" 403 {
-		close
+		# require authentication
+		import basic-auth
+
+		# upon successful auth, set a client token
+		header Set-Cookie "proxy-id={$PROXY_COOKIE_ID}; Domain={$DOMAIN}; Path=/; Max-Age={$CADDY_LOGIN_TIMEOUT}; HttpOnly; SameSite=Lax; Secure"
+
+		#delete the referer cookie
+		header +Set-Cookie "proxy-referer=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
+
+		# redirect back to the original site
+		redir {http.request.cookie.proxy-referer}
 	}
 
+	# fallback
+	respond "Access denied" 403 {
+		close
+	}
 }
 
 #########################
@@ -79,33 +77,33 @@ auth.{$DOMAIN} {
 
 # Flame Dashboard
 {$DOMAIN} {
-    import proxy-auth
-    reverse_proxy flame:5005
+	import proxy-auth
+	reverse_proxy flame:5005
 }
 
 # Pi-hole Admin Interface
 pihole.{$DOMAIN} {
-    import proxy-auth
-    reverse_proxy pihole:80
-    
-    @root path /
-    redir @root /admin 301
+	import proxy-auth
+	reverse_proxy pihole:80
+
+	@root path /
+	redir @root /admin 301
 }
 
 # Wireguard-easy Web Interface
 wireguard.{$DOMAIN} {
-    import proxy-auth
-    reverse_proxy wg-easy:51821
+	import proxy-auth
+	reverse_proxy wg-easy:51821
 }
 
 # Homeassistant Web Interface
 homeassistant.{$DOMAIN} {
-    import proxy-auth
-    reverse_proxy homeassistant:8123
+	import proxy-auth
+	reverse_proxy homeassistant:8123
 }
 
 # Dozzle Web Interface
 dozzle.{$DOMAIN} {
-    import proxy-auth
-    reverse_proxy dozzle:8080
+	import proxy-auth
+	reverse_proxy dozzle:8080
 }
