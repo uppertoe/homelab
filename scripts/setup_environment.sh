@@ -95,5 +95,30 @@ sudo usermod -aG docker $USER
 echo "vm.overcommit_memory = 1" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 
+# Install Log2Ram
+echo "Installing Log2Ram"
+echo "deb [signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packages.azlux.fr/debian/ bookworm main" | sudo tee /etc/apt/sources.list.d/azlux.list
+sudo wget -O /usr/share/keyrings/azlux-archive-keyring.gpg  https://azlux.fr/repo.gpg
+sudo apt update
+sudo apt install log2ram
+
+# Set the system logs to less than the RAM volume
+JOURNAL_CONF="/etc/systemd/journald.conf"
+SETTING="SystemMaxUse=20M"
+
+# Use sed to uncomment and set the SystemMaxUse parameter if it exists,
+# or append it if it doesn't.
+if grep -qE "^\s*#?\s*SystemMaxUse=" "$JOURNAL_CONF"; then
+    sudo sed -i -E "s/^\s*#?\s*SystemMaxUse=.*/$SETTING/" "$JOURNAL_CONF"
+    echo "Updated existing SystemMaxUse setting to $SETTING"
+else
+    echo "$SETTING" | sudo tee -a "$JOURNAL_CONF" > /dev/null
+    echo "Appended SystemMaxUse setting: $SETTING"
+fi
+
+# Restart the systemd-journald service to apply changes
+sudo systemctl restart systemd-journald
+echo "systemd-journald service restarted to apply changes."
+
 echo "Rebooting now!"
 sudo reboot

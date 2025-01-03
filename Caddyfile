@@ -77,6 +77,12 @@ auth.{$DOMAIN} {
 #------Local Routes-----#
 #########################
 
+# Flame Dashboard
+{$DOMAIN} {
+    import proxy-auth
+    reverse_proxy flame:5005
+}
+
 # Pi-hole Admin Interface
 pihole.{$DOMAIN} {
     import proxy-auth
@@ -98,8 +104,8 @@ homeassistant.{$DOMAIN} {
     reverse_proxy homeassistant:8123
 }
 
-# Flame Dashboard
-{$DOMAIN} {
+# Dozzle Web Interface
+dozzle.{$DOMAIN} {
     import proxy-auth
-    reverse_proxy flame:5005
+    reverse_proxy dozzle:8080
 }
