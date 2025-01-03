@@ -3,6 +3,8 @@ services:
   flame:
     image: pawelmalak/flame:multiarch
     container_name: flame
+    environment:
+      - PASSWORD: "${FLAME_PASSWORD}"
     volumes:
       - ${DOCKER_CONFIG_PATH}/flame:/app/data
       - /var/run/docker.sock:/var/run/docker.sock # optional but required for Docker integration
