@@ -5,8 +5,8 @@
 # ==============================================
 
 # Path to the token storage file
-PARENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
-TOKEN_FILE="$PARENT_DIRECTORY/config/caddy/secrets/.tokens"
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+TOKEN_FILE="$PROJECT_DIR/config/caddy/secrets/.tokens"
 
 # Ensure the token file exists; create if it doesn't
 if [ ! -f "$TOKEN_FILE" ]; then
