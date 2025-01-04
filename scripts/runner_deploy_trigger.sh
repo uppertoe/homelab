@@ -31,7 +31,7 @@ mkdir -p $GH_RUNNER_WATCH_DIR
 ABS_BASE_DOCKER_COMPOSE_YML=$(readlink -f "$PROJECT_DIR/$BASE_DOCKER_COMPOSE_YML" || true)
 
 # Configuration
-DEPLOY_COMMAND="docker compose -f $ABS_BASE_DOCKER_COMPOSE_YML pull && docker compose -f $ABS_BASE_DOCKER_COMPOSE_YML up -d --build"
+DEPLOY_COMMAND="docker compose -f $ABS_BASE_DOCKER_COMPOSE_YML pull && docker compose -f $ABS_BASE_DOCKER_COMPOSE_YML up -d"
 
 # Setup logs
 LOGS_DIR="$PROJECT_DIR/logs"
