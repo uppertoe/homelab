@@ -47,6 +47,9 @@ log() {
 if [ -f "$GH_RUNNER_WATCH_DIR/deploy.trigger" ]; then
     log "Deployment trigger detected. Executing deployment."
 
+    # Remove the trigger file
+    rm "$GH_RUNNER_WATCH_DIR/deploy.trigger"
+
     # Execute deployment commands
     if eval "$DEPLOY_COMMAND" >> "$LOG_FILE" 2>&1; then
         log "Deployment successful."
@@ -54,6 +57,4 @@ if [ -f "$GH_RUNNER_WATCH_DIR/deploy.trigger" ]; then
         log "Deployment failed."
     fi
 
-    # Remove the trigger file
-    rm "$GH_RUNNER_WATCH_DIR/deploy.trigger"
 fi
