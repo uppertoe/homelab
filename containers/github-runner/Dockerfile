@@ -34,9 +34,6 @@ RUN curl -o actions-runner.tar.gz -L ${GH_RUNNER_URL} \
     && tar xzf actions-runner.tar.gz \
     && rm actions-runner.tar.gz
 
-# Mount volumes for the trigger (handled in compose.yml)
-VOLUME ["/home/triggers"]
-
 # Copy the entrypoint script into the container
 COPY entrypoint.sh /home/github/actions-runner/entrypoint.sh
 RUN chmod +x /home/github/actions-runner/entrypoint.sh
