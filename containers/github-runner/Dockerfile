@@ -18,9 +18,6 @@ RUN addgroup -S github && adduser -S github -G github
 # Grant sudo privileges to the github user if needed
 RUN echo "github ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Switch to the github user
-USER github
-
 # Set the working directory
 WORKDIR /home/github/actions-runner
 
@@ -48,6 +45,9 @@ ENV RUNNER_WORKDIR=_work
 
 # Mount volumes for runner data and logs (handled in docker-compose.yml)
 VOLUME ["/home/github/actions-runner"]
+
+# Switch to the github user
+USER github
 
 # Entrypoint to configure and run the runner
 ENTRYPOINT ["/home/github/actions-runner/entrypoint.sh"]
