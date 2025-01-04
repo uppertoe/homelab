@@ -24,12 +24,13 @@ USER github
 # Set the working directory
 WORKDIR /home/github/actions-runner
 
-# Download the GitHub Actions runner package
-ENV GH_RUNNER_VERSION=${GH_RUNNER_VERSION}
-ENV GH_RUNNER_HASH=${GH_RUNNER_HASH}
-ENV GH_RUNNER_ARCH=${GH_RUNNER_ARCH}
+# Define build-time arguments
+ARG GH_RUNNER_VERSION
+ARG GH_RUNNER_HASH
+ARG GH_RUNNER_ARCH
 
-ENV GH_RUNNER_URL=https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-{$GH_RUNNER_ARCH}-${GH_RUNNER_VERSION}.tar.gz
+# Download the GitHub Actions runner package
+ENV GH_RUNNER_URL=https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-${GH_RUNNER_ARCH}-${GH_RUNNER_VERSION}.tar.gz
 
 RUN curl -o actions-runner.tar.gz -L ${GH_RUNNER_URL} \
     && echo "${GH_RUNNER_HASH}  actions-runner.tar.gz" | sha256sum -c - \
