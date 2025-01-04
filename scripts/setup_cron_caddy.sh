@@ -19,7 +19,7 @@ if ! command_exists crontab; then
     exit 1
 fi
 
-# Path to the directory containing this script
+# Path to the project directory
 PROJECT_DIR=".."
 
 # Path to the .env file (one level up from SCRIPTS)
@@ -98,7 +98,7 @@ if [ ! -f "$ABS_BASE_DOCKER_COMPOSE_YML" ]; then
 fi
 
 # Construct the cron job command
-CRON_COMMAND="$ROTATE_CREDS_CRON_SCHEDULE /bin/bash $ABS_UPDATE_SCRIPT && $ABS_DOCKER_BIN compose -f $ABS_BASE_DOCKER_COMPOSE_YML up -d caddy >> $ABS_CRON_LOG_FILE 2>&1"
+CRON_COMMAND_ROTATE_CADDY_CREDS="$ROTATE_CREDS_CRON_SCHEDULE /bin/bash $ABS_UPDATE_SCRIPT && $ABS_DOCKER_BIN compose -f $ABS_BASE_DOCKER_COMPOSE_YML up -d caddy >> $ABS_CRON_LOG_FILE 2>&1"
 
 # Check if the cron job already exists
 (crontab -l 2>/dev/null | grep -F "$ABS_UPDATE_SCRIPT") && EXISTS=true || EXISTS=false
@@ -107,9 +107,9 @@ if [ "$EXISTS" = true ]; then
     echo "$(date) - Cron job already exists. No changes made." >> "$SCRIPT_LOG_FILE"
 else
     # Add the cron job
-    (crontab -l 2>/dev/null; echo "$CRON_COMMAND") | crontab -
+    (crontab -l 2>/dev/null; echo "$CRON_COMMAND_ROTATE_CADDY_CREDS") | crontab -
     echo "$(date) - Cron job added successfully:" >> "$SCRIPT_LOG_FILE"
-    echo "$CRON_COMMAND" >> "$SCRIPT_LOG_FILE"
+    echo "$CRON_COMMAND_ROTATE_CADDY_CREDS" >> "$SCRIPT_LOG_FILE"
 fi
 
 echo "$(date) - Setup complete." >> "$SCRIPT_LOG_FILE"

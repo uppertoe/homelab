@@ -94,7 +94,10 @@ run_scripts() {
     ./update_proxy_cookie_id.sh
 
     # Ensure rotation of the Caddy secret
-    ./setup_cron.sh
+    ./setup_cron_caddy.sh
+
+    # Set up monitoring of the deploy trigger
+    ./setup_cron_deploy.sh
 
     # Requires user input for username and password
     ./update_proxy_credentials.sh

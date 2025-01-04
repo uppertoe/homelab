@@ -1,0 +1,15 @@
+services:
+  github-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: github_runner:latest
+    restart: unless_stopped
+    environment:
+      GH_RUNNER_VERSION: ${GH_RUNNER_VERSION}
+      GH_RUNNER_HASH: ${GH_RUNNER_HASH}
+      GH_RUNNER_ARCH: ${GH_RUNNER_ARCH}
+      GH_RUNNER_REPO: ${GH_RUNNER_REPO}
+      GH_RUNNER_CONFIG_TOKEN: ${GH_RUNNER_CONFIG_TOKEN}
+    volumes:
+      - ${DOCKER_CONFIG_PATH}/github-runner:/home/github/actions-runner
