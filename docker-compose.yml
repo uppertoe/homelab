@@ -6,7 +6,7 @@ include:
   - containers/homeassistant/compose.yml
   - containers/flame/compose.yml
   - containers/dozzle/compose.yml
-  - containers/github-runner/compose.yml
+  #- containers/github-runner/compose.yml
   #- containers/restic/compose.yml
 
 networks:
