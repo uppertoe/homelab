@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: github_runner:latest
     restart: unless_stopped
     environment:
       GH_RUNNER_VERSION: ${GH_RUNNER_VERSION}

@@ -31,7 +31,7 @@ mkdir -p $GH_RUNNER_WATCH_DIR
 ABS_BASE_DOCKER_COMPOSE_YML=$(readlink -f "$PROJECT_DIR/$BASE_DOCKER_COMPOSE_YML" || true)
 
 # Configuration
-DEPLOY_COMMAND="docker compose -f $ABS_BASE_DOCKER_COMPOSE_YML pull && docker compose -f $ABS_BASE_DOCKER_COMPOSE_YML up -d"
+DEPLOY_COMMAND="cd $DOCKER_CONFIG_PATH && git pull && docker compose -f $ABS_BASE_DOCKER_COMPOSE_YML up -d"
 
 # Setup logs
 LOGS_DIR="$PROJECT_DIR/logs"
@@ -47,7 +47,7 @@ log() {
 if [ -f "$GH_RUNNER_WATCH_DIR/deploy.trigger" ]; then
     log "Deployment trigger detected. Executing deployment."
 
-    # Remove the trigger file
+    # Remove the trigger file before execution
     rm "$GH_RUNNER_WATCH_DIR/deploy.trigger"
 
     # Execute deployment commands
