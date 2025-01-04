@@ -8,7 +8,7 @@ IFS=$'\n\t'
 export PATH="/usr/local/bin:/usr/bin:/bin"
 
 # Path to the project directory
-PROJECT_DIR=".."
+PARENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
 # Path to the .env file (one level up from SCRIPTS)
 ENV_FILE="$PROJECT_DIR/.env"

@@ -13,7 +13,8 @@ generate_hash() {
 }
 
 # Path to the .hashes file
-HASHES_FILE="../config/caddy/secrets/.hashes"
+PARENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+HASHES_FILE="$PARENT_DIRECTORY/config/caddy/secrets/.hashes"
 
 # Backup the existing .hashes file if it exists
 backup_hashes_file() {
