@@ -34,6 +34,9 @@ RUN curl -o actions-runner.tar.gz -L ${GH_RUNNER_URL} \
     && tar xzf actions-runner.tar.gz \
     && rm actions-runner.tar.gz
 
+    # Mount volumes for runner data and logs (handled in docker-compose.yml)
+VOLUME ["/home/github/actions-runner"]
+
 # Copy the entrypoint script into the container
 COPY entrypoint.sh /home/github/actions-runner/entrypoint.sh
 RUN chmod +x /home/github/actions-runner/entrypoint.sh
@@ -42,9 +45,6 @@ RUN chmod +x /home/github/actions-runner/entrypoint.sh
 ENV RUNNER_NAME=raspberry-pi-runner
 ENV RUNNER_LABELS=self-hosted,raspberry-pi,docker
 ENV RUNNER_WORKDIR=_work
-
-# Mount volumes for runner data and logs (handled in docker-compose.yml)
-VOLUME ["/home/github/actions-runner"]
 
 # Switch to the github user
 USER github

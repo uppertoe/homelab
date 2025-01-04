@@ -1,5 +1,6 @@
 services:
   github-runner:
+    container_name: github-runner
     build:
       context: .
       dockerfile: Dockerfile
