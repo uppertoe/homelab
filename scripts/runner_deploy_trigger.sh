@@ -23,9 +23,11 @@ fi
 source "$ENV_FILE"
 
 # Verify that required variables are set
-: "${GH_RUNNER_WATCH_DIR:?Environment variable GH_RUNNER_WATCH_DIR not set}"
+: "${DOCKER_CONFIG_PATH:?Environment variable DOCKER_CONFIG_PATH not set}"
 : "${BASE_DOCKER_COMPOSE_YML:?Environment variable BASE_DOCKER_COMPOSE_YML not set}"
 
+GH_RUNNER_WATCH_DIR=$DOCKER_CONFIG_PATH/github-runner
+mkdir -p $GH_RUNNER_WATCH_DIR
 ABS_BASE_DOCKER_COMPOSE_YML=$(readlink -f "$PROJECT_DIR/$BASE_DOCKER_COMPOSE_YML" || true)
 
 # Configuration
