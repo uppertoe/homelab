@@ -1,13 +1,7 @@
 services:
   github-runner:
     container_name: github-runner
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        GH_RUNNER_VERSION: "${GH_RUNNER_VERSION}"
-        GH_RUNNER_HASH: "${GH_RUNNER_HASH}"
-        GH_RUNNER_ARCH: "${GH_RUNNER_ARCH}"
+    image: uppertoe/pi-github-runner:latest
     restart: unless-stopped
     environment:
       GH_RUNNER_REPO: "${GH_RUNNER_REPO}"
