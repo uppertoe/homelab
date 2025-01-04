@@ -2,6 +2,7 @@ services:
   github-runner:
     container_name: github-runner
     image: uppertoe/pi-github-runner:latest
+    user: 1000:1000
     restart: unless-stopped
     environment:
       GH_RUNNER_REPO: "${GH_RUNNER_REPO}"
