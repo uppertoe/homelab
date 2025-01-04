@@ -1,16 +1,21 @@
-FROM alpine:3.21
+FROM debian:bullseye-slim
 
-# Install necessary packages
-RUN apk update && apk add --no-cache \
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install required packages for .NET Core and the GitHub Actions runner
+RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     curl \
     git \
-    sudo \
-    openjdk8-jre \
+    libicu-dev \
+    libc6-dev \
+    libssl-dev \
+    libkrb5-dev \
     tzdata \
     ca-certificates \
-    libc6-compat \
-    && rm -rf /var/cache/apk/*
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user for the runner
 RUN addgroup -S github && adduser -S github -G github
