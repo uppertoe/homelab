@@ -3,11 +3,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        GH_RUNNER_VERSION: "${GH_RUNNER_VERSION}"
+        GH_RUNNER_HASH: "${GH_RUNNER_HASH}"
+        GH_RUNNER_ARCH: "${GH_RUNNER_ARCH}"
     restart: unless_stopped
     environment:
-      GH_RUNNER_VERSION: "${GH_RUNNER_VERSION}"
-      GH_RUNNER_HASH: "${GH_RUNNER_HASH}"
-      GH_RUNNER_ARCH: "${GH_RUNNER_ARCH}"
       GH_RUNNER_REPO: "${GH_RUNNER_REPO}"
       GH_RUNNER_CONFIG_TOKEN: "${GH_RUNNER_CONFIG_TOKEN}"
     volumes:
