@@ -40,8 +40,7 @@ DEPLOY_COMMAND="cd \"$PROJECT_DIR\" && git pull && docker compose -f \"$BASE_DOC
 # Logging
 #------------------------------------------------------------------------------
 LOGS_DIR="$PROJECT_DIR/logs"
-LOG_FILE="$LOGS_DIR/webhook_pull.log"
-mkdir -p "$LOGS_DIR"
+LOG_FILE="$PROJECT_DIR/logs/webhook/event_gh_pull.log"
 
 log() {
   echo "$(date): $1" >> "$LOG_FILE"

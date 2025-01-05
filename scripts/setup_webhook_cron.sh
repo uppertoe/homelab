@@ -47,7 +47,7 @@ mkdir -p "$WEBHOOK_LOG_DIR"
 touch "$CRON_LOG_FILE" "$SCRIPT_LOG_FILE"
 
 # Set appropriate permissions
-chmod 700 "$CRON_LOG_DIR" "$WEBHOOK_LOG_DIR"
+chmod 700 "$WEBHOOK_LOG_DIR"
 chmod 600 "$CRON_LOG_FILE" "$SCRIPT_LOG_FILE"
 
 # Path to the script
