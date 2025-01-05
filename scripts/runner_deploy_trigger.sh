@@ -26,10 +26,9 @@ source "$ENV_FILE"
 : "${DOCKER_CONFIG_PATH:?Environment variable DOCKER_CONFIG_PATH not set}"
 : "${BASE_DOCKER_COMPOSE_YML:?Environment variable BASE_DOCKER_COMPOSE_YML not set}"
 
-GH_RUNNER_DIR=$DOCKER_CONFIG_PATH/github-runner
-GH_RUNNER_WATCH_DIR=$GH_RNNER_DIR/triggers
+GH_WATCH_DIR=$DOCKER_CONFIG_PATH/webhooks/triggers
 mkdir -p $GH_RUNNER_DIR
-mkdir -p $GH_RUNNER_WATCH_DIR
+mkdir -p $GH_WATCH_DIR
 ABS_BASE_DOCKER_COMPOSE_YML=$(readlink -f "$PROJECT_DIR/$BASE_DOCKER_COMPOSE_YML" || true)
 
 # Configuration
@@ -45,12 +44,12 @@ log() {
     echo "$(date): $1" >> "$LOG_FILE"
 }
 
-# Check if deploy.trigger exists
-if [ -f "$GH_RUNNER_WATCH_DIR/deploy.trigger" ]; then
+# Check if pull.trigger exists
+if [ -f "$GH_WATCH_DIR/pull.trigger" ]; then
     log "Deployment trigger detected. Executing deployment."
 
     # Remove the trigger file before execution
-    rm "$GH_RUNNER_WATCH_DIR/deploy.trigger"
+    rm "$GH_WATCH_DIR/pull.trigger"
 
     # Execute deployment commands
     if eval "$DEPLOY_COMMAND" >> "$LOG_FILE" 2>&1; then

@@ -1,0 +1,14 @@
+services:
+  webhooks:
+    container_name: webhooks
+    image: uppertoe/webhooks:latest
+    restart: unless-stopped
+    environment:
+      GH_OWNER: ${GH_OWNER}
+      GH_REPOSITORY: ${GH_REPOSITORY}
+      GH_TOKEN: ${GH_TOKEN}
+      DOMAIN: webhook.${DOMAIN}
+    volumes:
+      - "${DOCKER_CONFIG_PATH}/webhooks/triggers:/app/triggers"
+    networks:
+      - proxy-net

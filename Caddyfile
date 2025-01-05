@@ -107,3 +107,8 @@ dozzle.{$DOMAIN} {
 	import proxy-auth
 	reverse_proxy dozzle:8080
 }
+
+# Webhooks
+webhook.{$DOMAIN} {
+    reverse_proxy webhooks:8000
+}
