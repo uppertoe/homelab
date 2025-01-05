@@ -37,12 +37,11 @@ source "$ENV_FILE"
 : "${DEPLOY_TRIGGER_CRON_SCHEDULE:?Environment variable CRON_SCHEDULE not set}"
 
 # Set up logs
-CRON_LOG_DIR="$PROJECT_DIR/logs/cron"
 WEBHOOK_LOG_DIR="$PROJECT_DIR/logs/webhook"
 
-CRON_LOG_FILE="${CRON_LOG_DIR}/gh_pull.log"
-SCRIPT_LOG_FILE="${WEBHOOK_LOG_DIR}/gh_pull.log"
-mkdir -p "$CRON_LOG_DIR" "$WEBHOOK_LOG_DIR"
+CRON_LOG_FILE="${WEBHOOK_LOG_DIR}/cron_gh_pull.log"
+SCRIPT_LOG_FILE="${WEBHOOK_LOG_DIR}/setup_gh_pull.log"
+mkdir -p "$WEBHOOK_LOG_DIR"
 
 # Ensure the log files exist
 touch "$CRON_LOG_FILE" "$SCRIPT_LOG_FILE"

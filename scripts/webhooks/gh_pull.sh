@@ -12,7 +12,7 @@ IFS=$'\n\t'
 export PATH="/usr/local/bin:/usr/bin:/bin"
 
 # Resolve the project directory (two levels up from this script)
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"  # Up 2 levels
 ENV_FILE="$PROJECT_DIR/.env"
 
 # Ensure .env exists
