@@ -26,13 +26,13 @@
 
 	# If not authenticated, continue (and remove a referer cookie if exists)
 	handle @pass-auth {
-        header Set-Cookie "proxy-referer=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
+        header Set-Cookie "proxy-referer=; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax; Secure"
 	}
 
 	# Otherwise, redirect to auth
 	handle {
-		header Set-Cookie "proxy-referer={scheme}://{host}{uri}; Domain={$DOMAIN}; Path=/; Max-Age=30; HttpOnly; SameSite=Lax; Secure"
-		header +Set-Cookie "proxy-id=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
+		header Set-Cookie "proxy-referer={scheme}://{host}{uri}; Path=/; Max-Age=300; HttpOnly; SameSite=Lax; Secure"
+		header +Set-Cookie "proxy-id=; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax; Secure"
 		redir https://auth.{$DOMAIN}
 	}
 }
@@ -54,13 +54,13 @@ auth.{$DOMAIN} {
 		}
 
         # Remove the referer cookie
-        header Set-Cookie "proxy-referer=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
+        header Set-Cookie "proxy-referer=; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax; Secure"
 
 		# require authentication
 		import basic-auth
 
 		# upon successful auth, set a client token
-		header +Set-Cookie "proxy-id={$PROXY_COOKIE_ID}; Domain={$DOMAIN}; Path=/; Max-Age={$CADDY_LOGIN_TIMEOUT}; HttpOnly; SameSite=Lax; Secure"
+		header +Set-Cookie "proxy-id={$PROXY_COOKIE_ID}; Path=/; Max-Age={$CADDY_LOGIN_TIMEOUT}; HttpOnly; SameSite=Lax; Secure"
 
 		# redirect back to the original site
 		redir {http.request.cookie.proxy-referer}
