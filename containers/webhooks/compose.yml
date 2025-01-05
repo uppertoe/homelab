@@ -3,6 +3,7 @@ services:
     container_name: webhooks
     image: uppertoe/webhooks:latest
     restart: unless-stopped
+    user: "${UID}:${GID}"
     environment:
       GH_OWNER: ${GH_OWNER}
       GH_REPOSITORY: ${GH_REPOSITORY}
