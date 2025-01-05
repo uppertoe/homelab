@@ -4,7 +4,6 @@ set -e  # Exit on any error
 
 TARGET_USER="$(whoami)"
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
-echo $PROJECT_DIR
 ENV_FILE="$PROJECT_DIR/.env"
 
 source $ENV_FILE
