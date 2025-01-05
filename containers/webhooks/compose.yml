@@ -9,6 +9,6 @@ services:
       GH_TOKEN: ${GH_TOKEN}
       DOMAIN: webhook.${DOMAIN}
     volumes:
-      - "${DOCKER_CONFIG_PATH}/webhooks/triggers:/app/triggers"
+      - "${PROJECT_PATH}/${CONFIG}/webhooks/triggers:/app/triggers"
     networks:
       - proxy-net
