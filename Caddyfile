@@ -6,6 +6,7 @@
     servers {
         trusted_proxies static {$PRIVATE_NET_SUBNET}
     }
+    debug
 
 }
 
