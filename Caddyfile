@@ -30,7 +30,7 @@
 
 	# Otherwise, redirect to auth
 	handle {
-		header Set-Cookie "proxy-referer={scheme}://{host}{uri}; Domain={http.request.host.labels.2}{uri}; Path=/; Max-Age=30; HttpOnly; SameSite=Lax; Secure"
+		header Set-Cookie "proxy-referer={scheme}://{host}{uri}; Domain={http.request.host.labels.2}{host}{uri}; Path=/; Max-Age=30; HttpOnly; SameSite=Lax; Secure"
 		header +Set-Cookie "proxy-id=; Domain={$DOMAIN}; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure"
 		redir https://auth.{$DOMAIN}
 	}
