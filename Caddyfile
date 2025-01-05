@@ -3,6 +3,10 @@
 # =============================
 {
 	email {$CADDY_EMAIL}
+    servers {
+        trusted_proxies static {$PRIVATE_NET_SUBNET}
+    }
+
 }
 
 # =============================
@@ -84,7 +88,10 @@ auth.{$DOMAIN} {
 
 # Pi-hole Admin Interface
 pihole.{$DOMAIN} {
-	import proxy-auth
+    @denied not client_ip {$PROXY_NET_SUBNET}
+    handle @denied {
+	    import proxy-auth
+    }
 	reverse_proxy pihole:80
 
 	@root path /
