@@ -11,9 +11,8 @@ source $ENV_FILE
 
 TRIGGER_PATH="${PROJECT_DIR}/${CONFIG}/webhooks/triggers"
 mkdir -p "${TRIGGER_PATH}"
-sudo chown -R "${DOCKER_UID}:${DOCKER_GID}" "${TRIGGER_PATH}"
-sudo chmod -R 775 "${TRIGGER_PATH}"
-sudo chmod +x "${PROJECT_DIR}/scripts/webhooks/gh_pull.sh"
+sudo chown -R "${DOCKER_UID}:${DOCKER_GID}" "${TRIGGER_PATH}" "${PROJECT_DIR}/scripts/webhooks/gh_pull.sh"
+sudo chmod -R 775 "${TRIGGER_PATH}" "${PROJECT_DIR}/scripts/webhooks/gh_pull.sh"
 
 sudo bash -c "cat > /etc/systemd/system/pull-trigger.service <<EOF
 [Unit]
