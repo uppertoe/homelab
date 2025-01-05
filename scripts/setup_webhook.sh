@@ -16,12 +16,16 @@ sudo chmod -R 775 "${TRIGGER_PATH}" "${PROJECT_DIR}/scripts/webhooks/gh_pull.sh"
 sudo bash -c "cat > /etc/systemd/system/pull-trigger.service <<EOF
 [Unit]
 Description=Pull trigger for ${TARGET_USER}
+After=network.target
 
 [Service]
+Type=simple
 User=${TARGET_USER}
 WorkingDirectory=${PROJECT_DIR}
 ExecStart=${PROJECT_DIR}/scripts/webhooks/gh_pull.sh
 Restart=always
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
