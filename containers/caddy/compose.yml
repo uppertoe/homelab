@@ -3,8 +3,8 @@ services:
     image: caddy:latest
     container_name: caddy
     env_file:
-      - "${DOCKER_CONFIG_PATH}/caddy/secrets/.hashes"
-      - "${DOCKER_CONFIG_PATH}/caddy/secrets/.tokens"
+      - "${PROJECT_PATH}/${CONFIG}/caddy/secrets/.hashes"
+      - "${PROJECT_PATH}/${CONFIG}/caddy/secrets/.tokens"
     environment:  # Pass variables from the base compose
       CADDY_EMAIL: "${CADDY_EMAIL}"
       CADDY_LOGIN_TIMEOUT: "${CADDY_LOGIN_TIMEOUT}"
@@ -15,7 +15,7 @@ services:
     networks:
       - proxy-net
     volumes:
-      - "${CADDYFILE_PATH}:/etc/caddy/Caddyfile:ro"
-      - "${DOCKER_CONFIG_PATH}/caddy/caddy_data:/data"
-      - "${DOCKER_CONFIG_PATH}/caddy/caddy_config:/config"
+      - "${PROJECT_PATH}/${CADDYFILE}:/etc/caddy/Caddyfile:ro"
+      - "${PROJECT_PATH}/${CONFIG}/caddy/caddy_data:/data"
+      - "${PROJECT_PATH}/${CONFIG}/caddy/caddy_config:/config"
     restart: unless-stopped

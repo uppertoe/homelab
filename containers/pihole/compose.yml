@@ -16,9 +16,9 @@ services:
       - "853:853/tcp" # DNS over TLS
       # - "8081:80/tcp"  # Web interface managed by Caddy
     volumes:
-      - "${DOCKER_CONFIG_PATH}/pihole/etc-pihole:/etc/pihole"
-      - "${DOCKER_CONFIG_PATH}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
-      - "${DOCKER_CONFIG_PATH}/pihole/etc-lighttpd/external.conf:/etc/lighttpd/external.conf"
+      - "${PROJECT_PATH}/${CONFIG}/pihole/etc-pihole:/etc/pihole"
+      - "${PROJECT_PATH}/${CONFIG}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
+      - "${PROJECT_PATH}/${CONFIG}/pihole/etc-lighttpd/external.conf:/etc/lighttpd/external.conf"
     networks:
       proxy-net:
         ipv4_address: "${PIHOLE_STATIC_IP}"

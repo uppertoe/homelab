@@ -6,7 +6,7 @@ services:
       # Tell Homeassistant configuration.yaml to allow proxy traffic
       PROXY_NET_SUBNET: "${PROXY_NET_SUBNET}"
     volumes:
-      - ${DOCKER_CONFIG_PATH}/homeassistant:/config
+      - ${PROJECT_PATH}/${CONFIG}/homeassistant:/config
       - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
     restart: unless-stopped

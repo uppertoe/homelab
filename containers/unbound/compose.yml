@@ -18,7 +18,7 @@ services:
       private-net:
         ipv4_address: "${UNBOUND_STATIC_IP}"
     volumes:
-      - "${DOCKER_CONFIG_PATH}/unbound:/etc/unbound/custom.conf.d:ro"
+      - "${PROJECT_PATH}/${CONFIG}/unbound:/etc/unbound/custom.conf.d:ro"
     restart: unless-stopped
     depends_on:
       - redis

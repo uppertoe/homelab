@@ -116,6 +116,9 @@ else
     echo "Appended SystemMaxUse setting: $SETTING"
 fi
 
+# Install inotify-tools for webhooks
+sudo apt install inotify-tools -y
+
 # Restart the systemd-journald service to apply changes
 sudo systemctl restart systemd-journald
 echo "systemd-journald service restarted to apply changes."

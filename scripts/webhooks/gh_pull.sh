@@ -1,61 +1,26 @@
-#!/bin/bash
 
-#------------------------------------------------------------------------------
-# Strict settings
-#------------------------------------------------------------------------------
-set -euo pipefail
-IFS=$'\n\t'
+#!/usr/bin/env bash
 
-#------------------------------------------------------------------------------
-# Paths and environment
-#------------------------------------------------------------------------------
-export PATH="/usr/local/bin:/usr/bin:/bin"
-
-# Resolve the project directory (two levels up from this script)
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"  # Up 2 levels
 ENV_FILE="$PROJECT_DIR/.env"
 
-# Ensure .env exists
-if [[ ! -f "$ENV_FILE" ]]; then
-  echo "$(date) - ERROR: .env not found at $ENV_FILE" >&2
-  exit 1
-fi
+source ENV_FILE
 
-# Load environment variables
-source "$ENV_FILE"
+WATCH_DIR="$PROJECT_DIR/$CONFIG_PATH/webhooks/triggers"
+TRIGGER_FILE="pull.trigger"
 
-# Validate required env vars
-: "${DOCKER_CONFIG_PATH:?Environment variable DOCKER_CONFIG_PATH not set}"
-: "${BASE_DOCKER_COMPOSE_YML:?Environment variable BASE_DOCKER_COMPOSE_YML not set}"
-
-#------------------------------------------------------------------------------
-# Configuration
-#------------------------------------------------------------------------------
-GH_WATCH_DIR="$DOCKER_CONFIG_PATH/webhooks/triggers"
-mkdir -p "$GH_WATCH_DIR"
-
-DEPLOY_COMMAND="cd \"$PROJECT_DIR\" && git pull && docker compose -f \"$BASE_DOCKER_COMPOSE_YML\" up -d"
-
-#------------------------------------------------------------------------------
-# Logging
-#------------------------------------------------------------------------------
-LOGS_DIR="$PROJECT_DIR/logs"
-LOG_FILE="$PROJECT_DIR/logs/webhook/event_gh_pull.log"
-
-log() {
-  echo "$(date): $1" >> "$LOG_FILE"
-}
-
-#------------------------------------------------------------------------------
-# Main
-#------------------------------------------------------------------------------
-if [[ -f "$GH_WATCH_DIR/pull.trigger" ]]; then
-  log "Deployment trigger detected. Executing deployment."
-  rm "$GH_WATCH_DIR/pull.trigger"
-  
-  if eval "$DEPLOY_COMMAND" >> "$LOG_FILE" 2>&1; then
-    log "Deployment successful."
-  else
-    log "Deployment failed."
-  fi
-fi
+inotifywait -m --event create --format '%f' "$WATCH_DIR" | while read NEW_FILE
+do
+    if [ "$NEW_FILE" = "$TRIGGER_FILE" ]; then
+        echo "[INFO] Detected $TRIGGER_FILE. Pulling latest code and restarting containers..."
+        
+        cd "$PROJECT_DIR" || exit 1
+        
+        # Run the commands you need
+        git pull
+        docker compose up -d
+        
+        # Optionally remove the trigger file (if you only want it triggered once)
+        rm -f "$WATCH_DIR/$TRIGGER_FILE"
+    fi
+done
