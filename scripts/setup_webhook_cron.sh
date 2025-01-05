@@ -37,27 +37,22 @@ source "$ENV_FILE"
 : "${DEPLOY_TRIGGER_CRON_SCHEDULE:?Environment variable CRON_SCHEDULE not set}"
 
 # Set up logs
-LOGS_DIR="$PROJECT_DIR/logs"
-mkdir -p "$LOGS_DIR"
+CRON_LOG_DIR="$PROJECT_DIR/logs/cron"
+WEBHOOK_LOG_DIR="$PROJECT_DIR/logs/webhook"
 
-# Verify that the logs directory was created
-if [ ! -d "$LOGS_DIR" ]; then
-    echo "$(date) - ERROR: Logs directory $LOGS_DIR was not created." >&2
-    exit 1
-fi
-
-CRON_LOG_FILE="${LOGS_DIR}/runner_deploy_trigger_cron.log"
-SCRIPT_LOG_FILE="${LOGS_DIR}/runner_deploy_trigger.log"
+CRON_LOG_FILE="${CRON_LOG_DIR}/gh_pull.log"
+SCRIPT_LOG_FILE="${WEBHOOK_LOG_DIR}/gh_pull.log"
+mkdir -p "$CRON_LOG_DIR" "$WEBHOOK_LOG_DIR"
 
 # Ensure the log files exist
 touch "$CRON_LOG_FILE" "$SCRIPT_LOG_FILE"
 
 # Set appropriate permissions
-chmod 700 "$LOGS_DIR"
+chmod 700 "$CRON_LOG_DIR" "$WEBHOOK_LOG_DIR"
 chmod 600 "$CRON_LOG_FILE" "$SCRIPT_LOG_FILE"
 
 # Path to the script
-DEPLOY_SCRIPT="runner_deploy_trigger.sh"
+DEPLOY_SCRIPT="$PROJECT_DIR/scripts/webhooks/gh_pull.sh"
 
 # Ensure the update script exists and is executable
 if [ ! -f "$DEPLOY_SCRIPT" ]; then
@@ -70,21 +65,11 @@ if [ ! -x "$DEPLOY_SCRIPT" ]; then
     chmod +x "$DEPLOY_SCRIPT"
 fi
 
-# Resolve absolute paths
-ABS_DEPLOY_SCRIPT=$(readlink -f "$DEPLOY_SCRIPT" || true)
-ABS_CRON_LOG_FILE=$(readlink -f "$CRON_LOG_FILE" || true)
-
-# Verify that readlink worked
-if [ -z "$ABS_DEPLOY_SCRIPT" ]; then
-    echo "$(date) - ERROR: Failed to resolve absolute paths." >> "$SCRIPT_LOG_FILE"
-    exit 1
-fi
-
 # Construct the cron job command
-CRON_COMMAND_DEPLOY_TRIGGER="$DEPLOY_TRIGGER_CRON_SCHEDULE /bin/bash $ABS_DEPLOY_SCRIPT >> $ABS_CRON_LOG_FILE 2>&1"
+CRON_COMMAND_DEPLOY_TRIGGER="$DEPLOY_TRIGGER_CRON_SCHEDULE /bin/bash $DEPLOY_SCRIPT >> $CRON_LOG_FILE 2>&1"
 
 # Check if the cron job already exists
-(crontab -l 2>/dev/null | grep -F "$ABS_DEPLOY_SCRIPT") && EXISTS=true || EXISTS=false
+(crontab -l 2>/dev/null | grep -F "$DEPLOY_SCRIPT") && EXISTS=true || EXISTS=false
 
 if [ "$EXISTS" = true ]; then
     echo "$(date) - Cron job already exists. No changes made." >> "$SCRIPT_LOG_FILE"

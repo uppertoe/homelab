@@ -97,7 +97,7 @@ run_scripts() {
     ./setup_cron_caddy.sh
 
     # Set up monitoring of the deploy trigger
-    ./setup_cron_deploy.sh
+    ./setup_webhook.sh
 
     # Requires user input for username and password
     ./update_proxy_credentials.sh
