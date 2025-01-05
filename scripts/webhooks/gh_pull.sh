@@ -5,7 +5,7 @@ ENV_FILE="$PROJECT_DIR/.env"
 
 source $ENV_FILE
 
-WATCH_DIR="$PROJECT_DIR/$CONFIG_PATH/webhooks/triggers"
+WATCH_DIR="$PROJECT_DIR/$CONFIG/webhooks/triggers"
 TRIGGER_FILE="pull.trigger"
 
 inotifywait -m --event create --format '%f' "$WATCH_DIR" | while read NEW_FILE
