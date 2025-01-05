@@ -91,7 +91,7 @@ install_dependencies() {
 
 run_scripts() {
     # Set the secret cookie that Caddy uses for auth
-    ./update_proxy_cookie_id.sh
+    ./credentials/update_proxy_cookie_id.sh
 
     # Ensure rotation of the Caddy secret
     ./setup_cron_caddy.sh
@@ -100,7 +100,7 @@ run_scripts() {
     ./setup_webhook.sh
 
     # Requires user input for username and password
-    ./update_proxy_credentials.sh
+    ./credentials/update_proxy_credentials.sh
 }
 
 # Main Deployment Function

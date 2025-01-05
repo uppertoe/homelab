@@ -13,7 +13,7 @@ generate_hash() {
 }
 
 # Path to the .hashes file
-PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 HASHES_FILE="$PROJECT_DIR/config/caddy/secrets/.hashes"
 
 # Backup the existing .hashes file if it exists

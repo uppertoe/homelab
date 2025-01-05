@@ -60,7 +60,7 @@ chmod 700 "$LOGS_DIR"
 chmod 600 "$CRON_LOG_FILE" "$SCRIPT_LOG_FILE"
 
 # Path to the update_proxy_cookie_id.sh script
-UPDATE_SCRIPT="update_proxy_cookie_id.sh"
+UPDATE_SCRIPT="credentials/update_proxy_cookie_id.sh"
 
 # Ensure the update script exists and is executable
 if [ ! -f "$UPDATE_SCRIPT" ]; then

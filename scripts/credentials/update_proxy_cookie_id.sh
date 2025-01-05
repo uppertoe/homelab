@@ -5,7 +5,7 @@
 # ==============================================
 
 # Path to the token storage file
-PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 TOKEN_FILE="$PROJECT_DIR/config/caddy/secrets/.tokens"
 
 # Ensure the token file exists; create if it doesn't
