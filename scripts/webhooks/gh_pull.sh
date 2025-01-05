@@ -4,7 +4,7 @@
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"  # Up 2 levels
 ENV_FILE="$PROJECT_DIR/.env"
 
-source ENV_FILE
+source $ENV_FILE
 
 WATCH_DIR="$PROJECT_DIR/$CONFIG_PATH/webhooks/triggers"
 TRIGGER_FILE="pull.trigger"
