@@ -103,6 +103,38 @@ run_scripts() {
     ./credentials/update_proxy_credentials.sh
 }
 
+# Function to prompt the user
+prompt_external_drive_setup() {
+    while true; do
+        read -rp "Do you want to set up an external drive for homelab? (y/n): " yn
+        case $yn in
+            [Yy]* )
+                log "Setting up external drive..."
+                # Check if the setup script exists
+                if [ -f "./scripts/setup_external_drive.sh" ]; then
+                    # Execute the setup script
+                    ./scripts/setup_external_drive.sh
+                    log "External drive setup completed successfully."
+                else
+                    log "ERROR: ./scripts/setup_external_drive.sh not found or not executable." >&2
+                    exit 1
+                fi
+                break
+                ;;
+            [Nn]* )
+                log "Skipping external drive setup."
+                break
+                ;;
+            * )
+                log "Please answer yes (y) or no (n)."
+                ;;
+        esac
+    done
+}
+
+# Call the function to prompt the user
+prompt_external_drive_setup
+
 # Main Deployment Function
 main() {
     log "Starting deployment process..."
@@ -115,6 +147,11 @@ main() {
     run_scripts
 
     log "Deployment completed successfully."
+
+    log ""
+    log "Would you like to set up an external drive for your homelab?"
+    # Call the function to prompt the user
+    prompt_external_drive_setup
 }
 
 main
