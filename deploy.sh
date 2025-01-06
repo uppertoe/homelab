@@ -102,6 +102,9 @@ run_scripts() {
     # Set up permissions
     ./set_permissions.sh
 
+    # Set avahi settings (for Homeassistant device discovery)
+    sudo bash set_avahi_settings.sh
+
     # Requires user input for username and password
     ./credentials/update_proxy_credentials.sh
 }
