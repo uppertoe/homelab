@@ -175,15 +175,17 @@ update_fstab_main_mount() {
     echo "Updating /etc/fstab to ensure persistence on startup for the main mount..."
 
     UUID=$(blkid -s UUID -o value "$SELECTED_PARTITION")
+    echo "Retrieved UUID: '$UUID'"  # Debug statement
+
     if [ -z "$UUID" ]; then
-        echo "Unable to retrieve UUID for $SELECTED_PARTITION. Exiting."
+        echo "ERROR: Unable to retrieve UUID for $SELECTED_PARTITION. Exiting." >&2
         exit 1
     fi
 
     # Determine mount options based on filesystem type
     case "$FSTYPE" in
         ext4|ext3|ext2)
-            OPTIONS="defaults"
+            OPTIONS="defaults,noatime"
             ;;
         ntfs)
             OPTIONS="defaults,uid=$(id -u "$ORIGINAL_USER"),gid=$(id -g "$ORIGINAL_USER")"
@@ -201,7 +203,7 @@ update_fstab_main_mount() {
         echo "An entry for UUID=$UUID already exists in /etc/fstab. Skipping."
     else
         echo "Adding entry to /etc/fstab..."
-        echo "UUID=$UUID $MOUNT_POINT $FSTYPE $OPTIONS 0 2" | sudo tee -a /etc/fstab
+        echo "UUID=$UUID $MOUNT_POINT $FSTYPE $OPTIONS 0 2" | tee -a /etc/fstab
     fi
 }
 
