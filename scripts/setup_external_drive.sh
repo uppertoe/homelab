@@ -118,6 +118,32 @@ check_and_format_partition() {
     fi
 }
 
+
+# Function to unmount the selected partition if it's already mounted
+unmount_partition() {
+    if mountpoint -q "$MOUNT_POINT"; then
+        echo "Unmounting $SELECTED_PARTITION from $MOUNT_POINT..."
+        sudo umount "$MOUNT_POINT"
+        echo "Successfully unmounted $SELECTED_PARTITION."
+    else
+        echo "Partition $SELECTED_PARTITION is not mounted at $MOUNT_POINT. Skipping unmount."
+    fi
+}
+
+# Function to unmount bind mounts if they exist
+unmount_bind_mounts() {
+    local bind_mount
+    for bind_mount in "$CONFIG_DIR" "$DATA_DIR"; do
+        if mountpoint -q "$bind_mount"; then
+            echo "Unmounting bind mount: $bind_mount..."
+            sudo umount "$bind_mount"
+            echo "Successfully unmounted $bind_mount."
+        else
+            echo "Bind mount $bind_mount is not currently mounted. Skipping unmount."
+        fi
+    done
+}
+
 # Function to mount the partition
 mount_partition() {
     echo "Mounting $SELECTED_PARTITION to $MOUNT_POINT..."
@@ -214,6 +240,11 @@ list_drives
 select_partition
 check_and_format_partition
 determine_mount_point
+
+# Unmount any existing mounts
+unmount_partition
+unmount_bind_mounts
+
 mount_partition
 
 # Update /etc/fstab for the main mount
