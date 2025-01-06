@@ -99,6 +99,9 @@ run_scripts() {
     # Set up monitoring of the deploy trigger
     ./setup_webhook.sh
 
+    # Set up permissions
+    ./set_permissions.sh
+
     # Requires user input for username and password
     ./credentials/update_proxy_credentials.sh
 }
