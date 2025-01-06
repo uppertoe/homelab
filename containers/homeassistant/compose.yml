@@ -5,9 +5,11 @@ services:
     environment:
       # Tell Homeassistant configuration.yaml to allow proxy traffic
       PROXY_NET_SUBNET: "${PROXY_NET_SUBNET}"
+      PUID: 1000
+      PGID: 1000
+      TZ: "${TZ}"
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/homeassistant:/config
-      - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro  # Bluetooth integration
     restart: unless-stopped
     privileged: true

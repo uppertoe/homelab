@@ -21,7 +21,7 @@ source "$ENV_FILE"
 echo "Setting up project folders and permissions"
 CONFIG_DIR="$PROJECT_DIR/$CONFIG"
 DATA_DIR="$PROJECT_DIR/$DATA"
-mkdir -p CONFIG_DIR DATA_DIR
-sudo chown -R $USER:$USER CONFIG_DIR DATA_DIR
+mkdir -p $CONFIG_DIR $DATA_DIR
+sudo chown -R $USER:$USER $PROJECT_DIR
 
 echo "Permissions applied successfully"
