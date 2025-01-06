@@ -22,6 +22,6 @@ echo "Setting up project folders and permissions"
 CONFIG_DIR="$PROJECT_DIR/$CONFIG"
 DATA_DIR="$PROJECT_DIR/$DATA"
 mkdir -p CONFIG_DIR DATA_DIR
-sudo chown -R $DOCKER_UID:$DOCKER_GID CONFIG_DIR DATA_DIR
+sudo chown -R $USER:$USER CONFIG_DIR DATA_DIR
 
 echo "Permissions applied successfully"

@@ -176,18 +176,20 @@ mount_partition() {
     fi
 }
 
-# Function to bind a directory (config or data)
+# Function to bind a directory (config or data) and restore from backup
 bind_directory() {
     LOCAL_DIR="$1"         # e.g., homelab/config
     TARGET_DIR="$2"        # e.g., $CONFIG_DIR or $DATA_DIR
     DIR_ON_DRIVE="$MOUNT_POINT/$LOCAL_DIR"
+    BACKUP_DIR="${TARGET_DIR}.backup_$(date +%s)"
 
     echo "Creating $LOCAL_DIR directory on the drive..."
     sudo mkdir -p "$DIR_ON_DRIVE"
 
     echo "Backing up existing $LOCAL_DIR directory (if any)..."
     if [ -d "$TARGET_DIR" ]; then
-        sudo mv "$TARGET_DIR" "${TARGET_DIR}.backup_$(date +%s)"
+        sudo mv "$TARGET_DIR" "$BACKUP_DIR"
+        echo "Existing $TARGET_DIR moved to $BACKUP_DIR."
     fi
 
     echo "Creating target directory if it doesn't exist..."
@@ -200,8 +202,29 @@ bind_directory() {
     if ! grep -qs "$DIR_ON_DRIVE $TARGET_DIR none bind" /etc/fstab; then
         echo "$DIR_ON_DRIVE $TARGET_DIR none bind 0 0" | sudo tee -a /etc/fstab
         echo "Added bind mount for $TARGET_DIR to /etc/fstab."
+        echo "Reloading systemd daemon to recognize new fstab entries..."
+        sudo systemctl daemon-reload
     else
         echo "Bind mount for $TARGET_DIR already exists in /etc/fstab. Skipping."
+    fi
+
+    # Restore contents from backup to the new bind mount
+    if [ -d "$BACKUP_DIR" ]; then
+        echo "Restoring contents from $BACKUP_DIR to $TARGET_DIR..."
+        
+        # Use rsync for efficient and permission-preserving copy
+        sudo rsync -a "$BACKUP_DIR/" "$TARGET_DIR/"
+        echo "Contents restored from $BACKUP_DIR to $TARGET_DIR."
+
+        # Change ownership to the original user
+        sudo chown -R "$ORIGINAL_USER":"$ORIGINAL_USER" "$TARGET_DIR"
+
+        # Remove the backup directory
+        echo "Removing backup directory $BACKUP_DIR..."
+        sudo rm -rf "$BACKUP_DIR"
+        echo "Backup directory $BACKUP_DIR removed."
+    else
+        echo "No backup directory found at $BACKUP_DIR. Skipping restoration."
     fi
 }
 

@@ -7,6 +7,9 @@ Run the `scripts/setup_remote_ssh.sh` script on the remote computer
 - Use ctrl + o to save and ctrl + x to exit nano
 
 ```
+# Get the file from this repository
+curl -o setup_remote_ssh.sh https://raw.githubusercontent.com/uppertoe/homelab/refs/heads/main/scripts/setup_remote_ssh.sh
+
 # Set the RPi's IP and username as variables in the script
 nano scripts/setup_remote_ssh.sh
 
@@ -29,7 +32,7 @@ cd homelab
 ### Harden the RPi's security settings and install Docker
 Run 
 ```
-sh scripts/setup_environment.sh
+bash scripts/setup_environment.sh
 ```
 
 Note that SSH login with password authentication will no longer be possible
@@ -45,12 +48,11 @@ nano .env
 Use this to set a password for the web interface of each proxied service
 
 ```
-chmod +x deploy.sh
-deploy.sh
+bash deploy.sh
 ```
 
 # Updating containers
-This pulls the latest Pihole, Nginx and Home Assistant containers:
+This pulls the latest container images for each compose file:
 
 ```
 docker compose pull
