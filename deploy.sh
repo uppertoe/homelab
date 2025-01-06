@@ -132,9 +132,6 @@ prompt_external_drive_setup() {
     done
 }
 
-# Call the function to prompt the user
-prompt_external_drive_setup
-
 # Main Deployment Function
 main() {
     log "Starting deployment process..."

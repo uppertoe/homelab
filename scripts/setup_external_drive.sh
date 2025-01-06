@@ -253,6 +253,40 @@ update_fstab_main_mount() {
     fi
 }
 
+# Function to enable TRIM for SSD
+enable_trim() {
+    read -rp "Do you want to enable TRIM for your SSD? (y/n): " trim_choice
+
+    case "$trim_choice" in
+        [Yy]* )
+            echo "Enabling TRIM for SSD..."
+
+            # Check if fstrim is available
+            if ! command -v fstrim &> /dev/null; then
+                echo "fstrim could not be found. Installing util-linux..."
+                sudo apt update
+                sudo apt install -y util-linux
+            fi
+
+            echo "Running initial TRIM operation on $MOUNT_POINT..."
+            sudo fstrim -v "$MOUNT_POINT"
+
+            echo "Enabling and starting fstrim.timer for periodic TRIM operations..."
+            sudo systemctl enable fstrim.timer
+            sudo systemctl start fstrim.timer
+
+            echo "TRIM has been enabled and scheduled successfully."
+            ;;
+        [Nn]* )
+            echo "Skipping TRIM setup."
+            ;;
+        * )
+            echo "Invalid choice. Please enter y or n."
+            enable_trim
+            ;;
+    esac
+}
+
 # Main Script Execution
 echo "===== Homelab Mount Setup Script ====="
 
@@ -281,6 +315,11 @@ bind_directory "homelab/data" "$DATA_DIR"
 # Set permissions for homelab/data
 DATA_DIR_ON_DRIVE="$MOUNT_POINT/homelab/data"
 set_permissions "$DATA_DIR_ON_DRIVE"
+
+# Prompt to enable TRIM
+enable_trim
+
+sudo systemctl daemon-reload
 
 echo "===== Setup Completed Successfully! ====="
 echo "Partition $SELECTED_PARTITION is mounted at $MOUNT_POINT."

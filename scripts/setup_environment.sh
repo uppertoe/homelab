@@ -6,6 +6,21 @@ set -e
 # Variables
 SSH_PORT=2222  # Ensure this matches your existing SSH configuration
 
+# Path to the project directory
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+# Path to the .env file (one level up from SCRIPTS)
+ENV_FILE="$PROJECT_DIR/.env"
+
+# Verify that the .env file exists
+if [ ! -f "$ENV_FILE" ]; then
+    echo "$(date) - ERROR: .env file not found at $ENV_FILE" >&2
+    exit 1
+fi
+
+# Source the .env file
+source "$ENV_FILE"
+
 echo "Securing and updating the system..."
 
 # Update and install necessary packages
@@ -90,6 +105,12 @@ curl -sSL https://get.docker.com | sh
 
 echo "Setting the Docker user"
 sudo usermod -aG docker $USER
+
+echo "Setting up project folders and permissions"
+CONFIG_DIR="$PROJECT_DIR/$CONFIG"
+DATA_DIR="$PROJECT_DIR/$DATA"
+mkdir -p CONFIG_DIR DATA_DIR
+sudo chown -R $DOCKER_UID:$DOCKER_GID CONFIG_DIR DATA_DIR
 
 # Set up VM overcommit memory for Redis
 echo "vm.overcommit_memory = 1" | sudo tee -a /etc/sysctl.conf
