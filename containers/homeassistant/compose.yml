@@ -1,15 +1,18 @@
 services:
   homeassistant:
     container_name: homeassistant
-    image: "ghcr.io/home-assistant/home-assistant:stable"
+    image: lscr.io/linuxserver/homeassistant:latest
     environment:
       # Tell Homeassistant configuration.yaml to allow proxy traffic
       PROXY_NET_SUBNET: "${PROXY_NET_SUBNET}"
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/homeassistant:/config
       - /etc/localtime:/etc/localtime:ro
-      - /run/dbus:/run/dbus:ro
+      - /run/dbus:/run/dbus:ro  # Bluetooth integration
     restart: unless-stopped
     privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     networks:
       - proxy-net

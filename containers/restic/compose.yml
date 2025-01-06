@@ -2,8 +2,8 @@
 services:
   restic:
     image: lobaro/restic-backup-docker:latest
-    hostname: nas                                     # This will be visible in restic snapshot list
-    restart: always
+    hostname: restic-backups                                     # This will be visible in restic snapshot list
+    restart: unless-stopped
     privileged: true
     volumes:
       - /volume1/Backup:/data/Backup:ro               # Backup /volume1/Backup from host
