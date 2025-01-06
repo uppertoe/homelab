@@ -34,31 +34,32 @@ else
     ORIGINAL_USER="$USER"
 fi
 
-# Function to list available drives
+# Function to list available drives and partitions
 list_drives() {
-    echo "Available Drives:"
-    # List drives excluding the root filesystem
-    lsblk -o NAME,SIZE,TYPE,MOUNTPOINT | grep -E 'disk|part' | grep -v "$(df / | tail -1 | awk '{print $1}')"
+    echo "Available Drives and Partitions:"
+    lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT
 }
 
-# Function to prompt user to select a drive
-select_drive() {
-    drives=($(lsblk -dn -o NAME,TYPE | grep disk | awk '{print $1}'))
-    if [ ${#drives[@]} -eq 0 ]; then
-        echo "No available drives found."
-        exit 1
+# Function to prompt user to select a partition
+select_partition() {
+    echo "Select a partition to mount (e.g., sda2, sdb1):"
+    read -rp "Enter partition name (without /dev/): " PARTITION
+
+    # Validate input format
+    if [[ ! "$PARTITION" =~ ^[a-z]+[0-9]+$ ]]; then
+        echo "Invalid partition format. Please try again."
+        select_partition
     fi
 
-    echo "Select a drive to mount:"
-    select drive in "${drives[@]}"; do
-        if [[ -n "$drive" ]]; then
-            echo "You selected: /dev/$drive"
-            SELECTED_DRIVE="/dev/$drive"
-            break
-        else
-            echo "Invalid selection."
-        fi
-    done
+    SELECTED_PARTITION="/dev/$PARTITION"
+
+    # Check if the partition exists
+    if [ ! -b "$SELECTED_PARTITION" ]; then
+        echo "Partition $SELECTED_PARTITION does not exist. Please try again."
+        select_partition
+    fi
+
+    echo "You selected: $SELECTED_PARTITION"
 }
 
 # Function to determine or create a mount point
@@ -88,15 +89,44 @@ determine_mount_point() {
     fi
 }
 
-# Function to mount the drive
-mount_drive() {
-    echo "Mounting $SELECTED_DRIVE to $MOUNT_POINT..."
-    sudo mount "$SELECTED_DRIVE" "$MOUNT_POINT"
+# Function to check and optionally format the partition to ext4
+check_and_format_partition() {
+    CURRENT_FS=$(lsblk -no FSTYPE "$SELECTED_PARTITION")
 
-    # Get filesystem type
-    FSTYPE=$(lsblk -no FSTYPE "$SELECTED_DRIVE")
+    if [ "$CURRENT_FS" != "ext4" ]; then
+        echo "Current filesystem on $SELECTED_PARTITION is $CURRENT_FS."
+        echo "Recommended filesystem: ext4 for Linux compatibility and Docker integration."
+
+        read -p "Do you want to format $SELECTED_PARTITION to ext4? This will erase all data on the partition. (y/n): " format_choice
+
+        case "$format_choice" in
+            [Yy]* )
+                echo "Formatting $SELECTED_PARTITION to ext4..."
+                sudo mkfs.ext4 "$SELECTED_PARTITION"
+                echo "Formatting completed."
+                ;;
+            [Nn]* )
+                echo "Skipping formatting. Attempting to mount with existing filesystem."
+                ;;
+            * )
+                echo "Invalid choice. Please enter y or n."
+                check_and_format_partition
+                ;;
+        esac
+    else
+        echo "Partition $SELECTED_PARTITION is already formatted as ext4."
+    fi
+}
+
+# Function to mount the partition
+mount_partition() {
+    echo "Mounting $SELECTED_PARTITION to $MOUNT_POINT..."
+    sudo mount "$SELECTED_PARTITION" "$MOUNT_POINT"
+
+    # Get filesystem type after mounting
+    FSTYPE=$(lsblk -no FSTYPE "$SELECTED_PARTITION")
     if [ -z "$FSTYPE" ]; then
-        echo "Unable to determine filesystem type. Please ensure the drive is formatted."
+        echo "Unable to determine filesystem type. Please ensure the partition is formatted."
         exit 1
     fi
 }
@@ -115,8 +145,18 @@ bind_directory() {
         sudo mv "$TARGET_DIR" "${TARGET_DIR}.backup_$(date +%s)"
     fi
 
-    echo "Creating symbolic link for $LOCAL_DIR..."
-    ln -s "$DIR_ON_DRIVE" "$TARGET_DIR"
+    echo "Creating target directory if it doesn't exist..."
+    sudo mkdir -p "$TARGET_DIR"
+
+    echo "Creating bind mount for $LOCAL_DIR..."
+    sudo mount --bind "$DIR_ON_DRIVE" "$TARGET_DIR"
+
+    # Add bind mount to /etc/fstab for persistence
+    if ! grep -qs "$DIR_ON_DRIVE $TARGET_DIR none bind" /etc/fstab; then
+        echo "$DIR_ON_DRIVE $TARGET_DIR none bind 0 0" | sudo tee -a /etc/fstab
+    else
+        echo "Bind mount for $TARGET_DIR already exists in /etc/fstab. Skipping."
+    fi
 }
 
 # Function to set permissions for a directory on the drive
@@ -126,17 +166,17 @@ set_permissions() {
     sudo chown -R "$ORIGINAL_USER":"$ORIGINAL_USER" "$DIRECTORY"
 
     echo "Setting permissions to 755 for directories and 644 for files in $DIRECTORY..."
-    find "$DIRECTORY" -type d -exec sudo chmod 755 {} \;
-    find "$DIRECTORY" -type f -exec sudo chmod 644 {} \;
+    sudo find "$DIRECTORY" -type d -exec chmod 755 {} \;
+    sudo find "$DIRECTORY" -type f -exec chmod 644 {} \;
 }
 
-# Function to update /etc/fstab
-update_fstab() {
-    echo "Updating /etc/fstab to ensure persistence on startup..."
+# Function to update /etc/fstab for the main mount
+update_fstab_main_mount() {
+    echo "Updating /etc/fstab to ensure persistence on startup for the main mount..."
 
-    UUID=$(blkid -s UUID -o value "$SELECTED_DRIVE")
+    UUID=$(blkid -s UUID -o value "$SELECTED_PARTITION")
     if [ -z "$UUID" ]; then
-        echo "Unable to retrieve UUID for $SELECTED_DRIVE. Exiting."
+        echo "Unable to retrieve UUID for $SELECTED_PARTITION. Exiting."
         exit 1
     fi
 
@@ -156,7 +196,7 @@ update_fstab() {
             ;;
     esac
 
-    # Check if the mount point is already in fstab
+    # Check if the main mount is already in fstab
     if grep -qs "UUID=$UUID" /etc/fstab; then
         echo "An entry for UUID=$UUID already exists in /etc/fstab. Skipping."
     else
@@ -169,9 +209,13 @@ update_fstab() {
 echo "===== Homelab Mount Setup Script ====="
 
 list_drives
-select_drive
+select_partition
+check_and_format_partition
 determine_mount_point
-mount_drive
+mount_partition
+
+# Update /etc/fstab for the main mount
+update_fstab_main_mount
 
 # Bind homelab/config
 bind_directory "homelab/config" "$CONFIG_DIR"
@@ -182,12 +226,10 @@ set_permissions "$CONFIG_DIR_ON_DRIVE"
 # Bind homelab/data
 bind_directory "homelab/data" "$DATA_DIR"
 # Set permissions for homelab/data
-DATA_DIR_ON_DRIVE="$MOUNT_point/homelab/data"
+DATA_DIR_ON_DRIVE="$MOUNT_POINT/homelab/data"
 set_permissions "$DATA_DIR_ON_DRIVE"
 
-update_fstab
-
 echo "===== Setup Completed Successfully! ====="
-echo "Drive $SELECTED_DRIVE is mounted at $MOUNT_POINT."
-echo "~/homelab/config is linked to $CONFIG_DIR_ON_DRIVE."
-echo "~/homelab/data is linked to $DATA_DIR_ON_DRIVE."
+echo "Partition $SELECTED_PARTITION is mounted at $MOUNT_POINT."
+echo "~/homelab/config is bind-mounted to $CONFIG_DIR_ON_DRIVE."
+echo "~/homelab/data is bind-mounted to $DATA_DIR_ON_DRIVE."
