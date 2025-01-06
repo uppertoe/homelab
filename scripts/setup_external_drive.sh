@@ -3,6 +3,12 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# Check if the script is run as root
+if [ "$EUID" -ne 0 ]; then
+  echo "ERROR: Please run this script with sudo or as root."
+  exit 1
+fi
+
 # Path to the project directory
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
@@ -68,8 +74,8 @@ determine_mount_point() {
     read -p "Enter mount point [Default: $DEFAULT_MOUNT_POINT]: " INPUT_MOUNT_POINT
     MOUNT_POINT="${INPUT_MOUNT_POINT:-$DEFAULT_MOUNT_POINT}"
 
-    # Check if the mount point is already in use
-    if mount | grep "on $MOUNT_POINT " > /dev/null; then
+    # Check if the mount point exists and is correctly mounted
+    if mountpoint -q "$MOUNT_POINT"; then
         echo "Mount point $MOUNT_POINT is already in use."
         read -p "Do you want to use a different mount point? (y/n): " choice
         if [[ "$choice" =~ ^[Yy]$ ]]; then
@@ -78,14 +84,14 @@ determine_mount_point() {
             echo "Exiting to avoid mount conflicts."
             exit 1
         fi
-    fi
-
-    # Create the mount point directory if it doesn't exist
-    if [ ! -d "$MOUNT_POINT" ]; then
-        echo "Creating mount point at $MOUNT_POINT..."
-        sudo mkdir -p "$MOUNT_POINT"
     else
-        echo "Mount point $MOUNT_POINT already exists."
+        # Create the mount point directory if it doesn't exist
+        if [ ! -d "$MOUNT_POINT" ]; then
+            echo "Creating mount point at $MOUNT_POINT..."
+            mkdir -p "$MOUNT_POINT"
+        else
+            echo "Mount point $MOUNT_POINT already exists."
+        fi
     fi
 }
 
@@ -102,7 +108,7 @@ check_and_format_partition() {
         case "$format_choice" in
             [Yy]* )
                 echo "Formatting $SELECTED_PARTITION to ext4..."
-                sudo mkfs.ext4 "$SELECTED_PARTITION"
+                mkfs.ext4 "$SELECTED_PARTITION"
                 echo "Formatting completed."
                 ;;
             [Nn]* )
@@ -118,12 +124,11 @@ check_and_format_partition() {
     fi
 }
 
-
 # Function to unmount the selected partition if it's already mounted
 unmount_partition() {
     if mountpoint -q "$MOUNT_POINT"; then
         echo "Unmounting $SELECTED_PARTITION from $MOUNT_POINT..."
-        sudo umount "$MOUNT_POINT"
+        umount "$MOUNT_POINT"
         echo "Successfully unmounted $SELECTED_PARTITION."
     else
         echo "Partition $SELECTED_PARTITION is not mounted at $MOUNT_POINT. Skipping unmount."
@@ -136,7 +141,7 @@ unmount_bind_mounts() {
     for bind_mount in "$CONFIG_DIR" "$DATA_DIR"; do
         if mountpoint -q "$bind_mount"; then
             echo "Unmounting bind mount: $bind_mount..."
-            sudo umount "$bind_mount"
+            umount "$bind_mount"
             echo "Successfully unmounted $bind_mount."
         else
             echo "Bind mount $bind_mount is not currently mounted. Skipping unmount."
@@ -147,7 +152,7 @@ unmount_bind_mounts() {
 # Function to mount the partition
 mount_partition() {
     echo "Mounting $SELECTED_PARTITION to $MOUNT_POINT..."
-    sudo mount "$SELECTED_PARTITION" "$MOUNT_POINT"
+    mount "$SELECTED_PARTITION" "$MOUNT_POINT"
 
     # Get filesystem type after mounting
     FSTYPE=$(lsblk -no FSTYPE "$SELECTED_PARTITION")
@@ -164,22 +169,23 @@ bind_directory() {
     DIR_ON_DRIVE="$MOUNT_POINT/$LOCAL_DIR"
 
     echo "Creating $LOCAL_DIR directory on the drive..."
-    sudo mkdir -p "$DIR_ON_DRIVE"
+    mkdir -p "$DIR_ON_DRIVE"
 
     echo "Backing up existing $LOCAL_DIR directory (if any)..."
     if [ -d "$TARGET_DIR" ]; then
-        sudo mv "$TARGET_DIR" "${TARGET_DIR}.backup_$(date +%s)"
+        mv "$TARGET_DIR" "${TARGET_DIR}.backup_$(date +%s)"
     fi
 
     echo "Creating target directory if it doesn't exist..."
-    sudo mkdir -p "$TARGET_DIR"
+    mkdir -p "$TARGET_DIR"
 
     echo "Creating bind mount for $LOCAL_DIR..."
-    sudo mount --bind "$DIR_ON_DRIVE" "$TARGET_DIR"
+    mount --bind "$DIR_ON_DRIVE" "$TARGET_DIR"
 
     # Add bind mount to /etc/fstab for persistence
     if ! grep -qs "$DIR_ON_DRIVE $TARGET_DIR none bind" /etc/fstab; then
-        echo "$DIR_ON_DRIVE $TARGET_DIR none bind 0 0" | sudo tee -a /etc/fstab
+        echo "$DIR_ON_DRIVE $TARGET_DIR none bind 0 0" | tee -a /etc/fstab
+        echo "Added bind mount for $TARGET_DIR to /etc/fstab."
     else
         echo "Bind mount for $TARGET_DIR already exists in /etc/fstab. Skipping."
     fi
@@ -189,11 +195,11 @@ bind_directory() {
 set_permissions() {
     DIRECTORY="$1"  # e.g., $CONFIG_DIR_ON_DRIVE or $DATA_DIR_ON_DRIVE
     echo "Setting ownership to $ORIGINAL_USER:$ORIGINAL_USER for $DIRECTORY..."
-    sudo chown -R "$ORIGINAL_USER":"$ORIGINAL_USER" "$DIRECTORY"
+    chown -R "$ORIGINAL_USER":"$ORIGINAL_USER" "$DIRECTORY"
 
     echo "Setting permissions to 755 for directories and 644 for files in $DIRECTORY..."
-    sudo find "$DIRECTORY" -type d -exec chmod 755 {} \;
-    sudo find "$DIRECTORY" -type f -exec chmod 644 {} \;
+    find "$DIRECTORY" -type d -exec chmod 755 {} \;
+    find "$DIRECTORY" -type f -exec chmod 644 {} \;
 }
 
 # Function to update /etc/fstab for the main mount
@@ -201,7 +207,7 @@ update_fstab_main_mount() {
     echo "Updating /etc/fstab to ensure persistence on startup for the main mount..."
 
     UUID=$(blkid -s UUID -o value "$SELECTED_PARTITION")
-    echo "Retrieved UUID: '$UUID'"  # Debug statement
+    echo "Retrieved UUID: '$UUID'"
 
     if [ -z "$UUID" ]; then
         echo "ERROR: Unable to retrieve UUID for $SELECTED_PARTITION. Exiting." >&2
@@ -233,6 +239,31 @@ update_fstab_main_mount() {
     fi
 }
 
+# Function to unmount the selected partition if it's already mounted
+unmount_partition() {
+    if mountpoint -q "$MOUNT_POINT"; then
+        echo "Unmounting $SELECTED_PARTITION from $MOUNT_POINT..."
+        umount "$MOUNT_POINT"
+        echo "Successfully unmounted $SELECTED_PARTITION."
+    else
+        echo "Partition $SELECTED_PARTITION is not mounted at $MOUNT_POINT. Skipping unmount."
+    fi
+}
+
+# Function to unmount bind mounts if they exist
+unmount_bind_mounts() {
+    local bind_mount
+    for bind_mount in "$CONFIG_DIR" "$DATA_DIR"; do
+        if mountpoint -q "$bind_mount"; then
+            echo "Unmounting bind mount: $bind_mount..."
+            umount "$bind_mount"
+            echo "Successfully unmounted $bind_mount."
+        else
+            echo "Bind mount $bind_mount is not currently mounted. Skipping unmount."
+        fi
+    done
+}
+
 # Main Script Execution
 echo "===== Homelab Mount Setup Script ====="
 
@@ -241,7 +272,7 @@ select_partition
 check_and_format_partition
 determine_mount_point
 
-# Unmount any existing mounts
+# Unmount any existing mounts to ensure a clean setup
 unmount_partition
 unmount_bind_mounts
 
