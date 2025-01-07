@@ -113,3 +113,9 @@ dozzle.{$DOMAIN} {
 webhook.{$DOMAIN} {
     reverse_proxy webhooks:8000
 }
+
+# Zigbee2MQTT
+zigbee.{$DOMAIN} {
+    import proxy-auth
+    reverse proxy zigbee2mqtt:8080
+}

@@ -42,7 +42,6 @@ services:
     container_name: mosquitto
     image: eclipse-mosquitto
     restart: unless-stopped
-    user: 1000:1000
     networks:
       - private-net
     #ports:
