@@ -49,9 +49,7 @@ services:
     #  - 1884:1884
     #  - 9001:9001  # Websockets
     volumes:
-      - ${PROJECT_PATH}/${CONFIG}/mosquitto/config:/mosquitto/config
-      - ${PROJECT_PATH}/${CONFIG}/mosquitto/data:/mosquitto/data
-      - ${PROJECT_PATH}/${CONFIG}/mosquitto/log:/mosquitto/log
+      - ${PROJECT_PATH}/${CONFIG}/mosquitto:/mosquitto
     environment:
       TZ: "${TZ}"
       PUID: "${DOCKER_UID}"
