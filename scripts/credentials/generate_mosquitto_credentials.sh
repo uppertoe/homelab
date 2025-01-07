@@ -4,7 +4,7 @@
 set -e
 
 # Path to the project directory (one level up from the script's directory)
-PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
 # Path to the .env file (located in the project directory)
 ENV_FILE="$PROJECT_DIR/.env"
