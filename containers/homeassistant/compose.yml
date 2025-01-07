@@ -49,7 +49,9 @@ services:
     #  - 1884:1884
     #  - 9001:9001  # Websockets
     volumes:
-      - ${PROJECT_PATH}/${CONFIG}/mosquitto:/mosquitto
+      - ${PROJECT_PATH}/${CONFIG}/mosquitto/config:/mosquitto/config
+      - ${PROJECT_PATH}/${CONFIG}/mosquitto/data:/mosquitto/data
+      - ${PROJECT_PATH}/${CONFIG}/mosquitto/logs:/mosquitto/logs
       - ${PROJECT_PATH}/certs/server:/certs
     environment:
       TZ: "${TZ}"
