@@ -94,7 +94,7 @@ gen_client () {
         -CAcreateserial -out "$CLIENT_DIR/client.crt" -days 3650
 
     # Optionally, remove the CSR after signing
-    rm "$CLIENT_DIR/$CLIENT_NAME.csr"
+    rm "$CLIENT_DIR/client.csr"
     echo "$(date) - Client certificate and key for $CLIENT_NAME generated successfully."
 
     # Copy CA certificate to client directory for verification
