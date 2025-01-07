@@ -26,23 +26,28 @@ fi
 
 # Define paths for server and client certificates
 SERVER_CERT_DIR="$PROJECT_DIR/certs/server"
-CLIENT_CERT_DIR="$PROJECT_DIR/certs/client"
+CLIENTS_CERT_BASE_DIR="$PROJECT_DIR/certs/clients"
+
+# Define clients
+CLIENTS=("zigbee2mqtt" "homeassistant")
 
 # Create certificate directories if they don't exist
 echo "$(date) - Creating certificate directories..."
 mkdir -p "$SERVER_CERT_DIR"
-mkdir -p "$CLIENT_CERT_DIR"
+for CLIENT in "${CLIENTS[@]}"; do
+    mkdir -p "$CLIENTS_CERT_BASE_DIR/$CLIENT"
+done
 
 # ==============================
 # Certificate Generation Section
 # ==============================
 
-# Define IP address and subject information
-IP_ADDR="localhost"  # Modify as needed
+# Define server hostname
+SERVER_HOSTNAME="mosquitto"
 
-INFO_CA="/C=BE/ST=Brussels/L=Brussels/O=espboards/OU=CA/CN=$IP_ADDR"
-INFO_SERVER="/C=BE/ST=Brussels/L=Brussels/O=espboards/OU=Server/CN=$IP_ADDR"
-INFO_CLIENT="/C=BE/ST=Brussels/L=Brussels/O=espboards/OU=Client/CN=$IP_ADDR"
+# Define subject information
+INFO_CA="/C=AU/ST=Victoria/L=Melbourne/O=homelab/OU=CA/CN=homelab_CA"
+INFO_SERVER="/C=AU/ST=Victoria/L=Melbourne/O=homelab/OU=Server/CN=$SERVER_HOSTNAME"
 
 # Function to generate Certificate Authority (CA)
 gen_CA () {
@@ -57,7 +62,7 @@ gen_CA () {
 
 # Function to generate Server Certificate and Key
 gen_server () {
-    echo "$(date) - Generating server certificate and key..."
+    echo "$(date) - Generating server certificate and key for $SERVER_HOSTNAME..."
     openssl req -nodes -sha256 -new \
         -subj "$INFO_SERVER" \
         -keyout "$SERVER_CERT_DIR/server.key" \
@@ -74,37 +79,42 @@ gen_server () {
 
 # Function to generate Client Certificate and Key
 gen_client () {
-    echo "$(date) - Generating client certificate and key..."
+    local CLIENT_NAME="$1"
+    local CLIENT_DIR="$CLIENTS_CERT_BASE_DIR/$CLIENT_NAME"
+    local INFO_CLIENT="/C=AU/ST=SomeState/L=Melbourne/O=homelab/OU=Client/CN=$CLIENT_NAME"
+
+    echo "$(date) - Generating client certificate and key for $CLIENT_NAME..."
     openssl req -new -nodes -sha256 \
         -subj "$INFO_CLIENT" \
-        -out "$CLIENT_CERT_DIR/client.csr" \
-        -keyout "$CLIENT_CERT_DIR/client.key"
+        -out "$CLIENT_DIR/client.csr" \
+        -keyout "$CLIENT_DIR/client.key"
 
-    openssl x509 -req -sha256 -in "$CLIENT_CERT_DIR/client.csr" \
+    openssl x509 -req -sha256 -in "$CLIENT_DIR/client.csr" \
         -CA "$SERVER_CERT_DIR/ca.crt" -CAkey "$SERVER_CERT_DIR/ca.key" \
-        -CAcreateserial -out "$CLIENT_CERT_DIR/client.crt" -days 3650
+        -CAcreateserial -out "$CLIENT_DIR/client.crt" -days 3650
 
     # Optionally, remove the CSR after signing
-    rm "$CLIENT_CERT_DIR/client.csr"
-    echo "$(date) - Client certificate and key generated successfully."
+    rm "$CLIENT_DIR/$CLIENT_NAME.csr"
+    echo "$(date) - Client certificate and key for $CLIENT_NAME generated successfully."
+
+    # Copy CA certificate to client directory for verification
+    cp "$SERVER_CERT_DIR/ca.crt" "$CLIENT_DIR/"
+    echo "$(date) - CA certificate copied to $CLIENT_NAME client directory."
 }
 
 # Generate CA, Server, and Client Certificates
 gen_CA
 gen_server
-gen_client
-
-# Copy CA certificate to client directory for verification
-echo "$(date) - Copying CA certificate to client directory..."
-cp "$SERVER_CERT_DIR/ca.crt" "$CLIENT_CERT_DIR/"
-echo "$(date) - CA certificate copied to client directory."
+for CLIENT in "${CLIENTS[@]}"; do
+    gen_client "$CLIENT"
+done
 
 # ==============================
 # Directory Security Section
 # ==============================
 
 # Function to secure a directory
-secure_directory() {
+secure_directory () {
     local DIR_PATH="$1"
     echo "$(date) - Securing directory: $DIR_PATH"
 
@@ -137,8 +147,10 @@ secure_directory() {
 # Secure the server certificates directory
 secure_directory "$SERVER_CERT_DIR"
 
-# Secure the client certificates directory
-secure_directory "$CLIENT_CERT_DIR"
+# Secure each client certificates directory
+for CLIENT in "${CLIENTS[@]}"; do
+    secure_directory "$CLIENTS_CERT_BASE_DIR/$CLIENT"
+done
 
 # Verification Step: List permissions for server certificates
 echo "$(date) - Verifying server certificates permissions:"
@@ -146,8 +158,10 @@ ls -ld "$SERVER_CERT_DIR"
 ls -l "$SERVER_CERT_DIR"
 
 # Verification Step: List permissions for client certificates
-echo "$(date) - Verifying client certificates permissions:"
-ls -ld "$CLIENT_CERT_DIR"
-ls -l "$CLIENT_CERT_DIR"
+for CLIENT in "${CLIENTS[@]}"; do
+    echo "$(date) - Verifying certificates permissions for $CLIENT:"
+    ls -ld "$CLIENTS_CERT_BASE_DIR/$CLIENT"
+    ls -l "$CLIENTS_CERT_BASE_DIR/$CLIENT"
+done
 
 echo "$(date) - Certificate directories have been secured successfully."
