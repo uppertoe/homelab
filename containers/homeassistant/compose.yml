@@ -5,8 +5,8 @@ services:
     environment:
       # Tell Homeassistant configuration.yaml to allow proxy traffic
       PROXY_NET_SUBNET: "${PROXY_NET_SUBNET}"
-      PUID: "${DOCKER_UID}"
-      PGID: "${DOCKER_GID}"
+      PUID: 1000
+      PGID: 1000
       TZ: "${TZ}"
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/homeassistant:/config
@@ -50,6 +50,7 @@ services:
     #  - 9001:9001  # Websockets
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/mosquitto:/mosquitto
+      - ${PROJECT_PATH}/certs/server:/certs
     environment:
       TZ: "${TZ}"
       PUID: "${DOCKER_UID}"
@@ -65,6 +66,7 @@ services:
       user: 1000:1000
       volumes:
           - ${PROJECT_PATH}/${CONFIG}/zigbee2mqtt:/app/data
+          - ${PROJECT_PATH}/certs/client:/certs
           - /run/udev:/run/udev:ro
       #ports:
           # Frontend port
