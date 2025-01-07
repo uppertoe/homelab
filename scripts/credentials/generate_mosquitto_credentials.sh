@@ -4,7 +4,7 @@
 set -e
 
 # Path to the project directory (one level up from the script's directory)
-PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
 # Path to the .env file (located in the project directory)
 ENV_FILE="$PROJECT_DIR/.env"
@@ -32,6 +32,76 @@ CLIENT_CERT_DIR="$PROJECT_DIR/certs/client"
 echo "$(date) - Creating certificate directories..."
 mkdir -p "$SERVER_CERT_DIR"
 mkdir -p "$CLIENT_CERT_DIR"
+
+# ==============================
+# Certificate Generation Section
+# ==============================
+
+# Define IP address and subject information
+IP_ADDR="localhost"  # Modify as needed
+
+INFO_CA="/C=BE/ST=Brussels/L=Brussels/O=espboards/OU=CA/CN=$IP_ADDR"
+INFO_SERVER="/C=BE/ST=Brussels/L=Brussels/O=espboards/OU=Server/CN=$IP_ADDR"
+INFO_CLIENT="/C=BE/ST=Brussels/L=Brussels/O=espboards/OU=Client/CN=$IP_ADDR"
+
+# Function to generate Certificate Authority (CA)
+gen_CA () {
+    echo "$(date) - Generating CA certificate and key..."
+    openssl req -x509 -nodes -sha256 -newkey rsa:2048 \
+        -subj "$INFO_CA" \
+        -days 3650 \
+        -keyout "$SERVER_CERT_DIR/ca.key" \
+        -out "$SERVER_CERT_DIR/ca.crt"
+    echo "$(date) - CA certificate and key generated successfully."
+}
+
+# Function to generate Server Certificate and Key
+gen_server () {
+    echo "$(date) - Generating server certificate and key..."
+    openssl req -nodes -sha256 -new \
+        -subj "$INFO_SERVER" \
+        -keyout "$SERVER_CERT_DIR/server.key" \
+        -out "$SERVER_CERT_DIR/server.csr"
+
+    openssl x509 -req -sha256 -in "$SERVER_CERT_DIR/server.csr" \
+        -CA "$SERVER_CERT_DIR/ca.crt" -CAkey "$SERVER_CERT_DIR/ca.key" \
+        -CAcreateserial -out "$SERVER_CERT_DIR/server.crt" -days 3650
+
+    # Optionally, remove the CSR after signing
+    rm "$SERVER_CERT_DIR/server.csr"
+    echo "$(date) - Server certificate and key generated successfully."
+}
+
+# Function to generate Client Certificate and Key
+gen_client () {
+    echo "$(date) - Generating client certificate and key..."
+    openssl req -new -nodes -sha256 \
+        -subj "$INFO_CLIENT" \
+        -out "$CLIENT_CERT_DIR/client.csr" \
+        -keyout "$CLIENT_CERT_DIR/client.key"
+
+    openssl x509 -req -sha256 -in "$CLIENT_CERT_DIR/client.csr" \
+        -CA "$SERVER_CERT_DIR/ca.crt" -CAkey "$SERVER_CERT_DIR/ca.key" \
+        -CAcreateserial -out "$CLIENT_CERT_DIR/client.crt" -days 3650
+
+    # Optionally, remove the CSR after signing
+    rm "$CLIENT_CERT_DIR/client.csr"
+    echo "$(date) - Client certificate and key generated successfully."
+}
+
+# Generate CA, Server, and Client Certificates
+gen_CA
+gen_server
+gen_client
+
+# Copy CA certificate to client directory for verification
+echo "$(date) - Copying CA certificate to client directory..."
+cp "$SERVER_CERT_DIR/ca.crt" "$CLIENT_CERT_DIR/"
+echo "$(date) - CA certificate copied to client directory."
+
+# ==============================
+# Directory Security Section
+# ==============================
 
 # Function to secure a directory
 secure_directory() {
