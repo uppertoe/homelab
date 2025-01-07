@@ -6,7 +6,7 @@ services:
       # Tell Homeassistant configuration.yaml to allow proxy traffic
       PROXY_NET_SUBNET: "${PROXY_NET_SUBNET}"
       PUID: "${DOCKER_UID}"
-      PGID: "${DOCKER GID}"
+      PGID: "${DOCKER_GID}"
       TZ: "${TZ}"
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/homeassistant:/config
@@ -55,7 +55,7 @@ services:
     environment:
       TZ: "${TZ}"
       PUID: "${DOCKER_UID}"
-      PGID: "${DOCKER GID}"
+      PGID: "${DOCKER_GID}"
 
   zigbee2mqtt:  # Port 8080
   # https://www.zigbee2mqtt.io/guide/installation/02_docker.html
