@@ -61,11 +61,11 @@ sudo ufw allow 1883/tcp
 # Modify /etc/ufw/before.rules to allow IGMP and multicast traffic
 # This is necessary because UFW does not handle some protocols like IGMP by default.
 
-# Check if IGMP and multicast rules are already present to avoid duplication
-if ! sudo grep -q "# Allow IGMP and Multicast traffic" /etc/ufw/before.rules; then
-    sudo bash -c 'cat <<EOF >> /etc/ufw/before.rules
+# Define the path to the before.rules file
+BEFORE_RULES="/etc/ufw/before.rules"
 
-# Allow IGMP and Multicast traffic
+# Define the multicast rules block
+MULTICAST_RULES="# Allow IGMP and Multicast traffic
 # Allow IGMP
 -A ufw-before-input -p igmp -j ACCEPT
 -A ufw-before-output -p igmp -j ACCEPT
@@ -73,10 +73,27 @@ if ! sudo grep -q "# Allow IGMP and Multicast traffic" /etc/ufw/before.rules; th
 # Allow multicast traffic (224.0.0.0/4)
 -A ufw-before-input -d 224.0.0.0/4 -j ACCEPT
 -A ufw-before-output -d 224.0.0.0/4 -j ACCEPT
-EOF'
-    echo "Added IGMP and multicast rules to /etc/ufw/before.rules"
+-A ufw-before-forward -d 224.0.0.0/4 -j ACCEPT
+-A ufw-before-forward -s 224.0.0.0/4 -j ACCEPT"
+
+# Check if IGMP and multicast rules are already present to avoid duplication
+if ! sudo grep -q "# Allow IGMP and Multicast traffic" "$BEFORE_RULES"; then
+    echo "Adding IGMP and multicast rules to $BEFORE_RULES"
+
+    # Use awk to insert the multicast rules before the COMMIT line
+    sudo awk -v rules="$MULTICAST_RULES" '
+    /^COMMIT$/ {
+        print rules
+    }
+    { print }
+    ' "$BEFORE_RULES" | sudo tee "$BEFORE_RULES.tmp" > /dev/null
+
+    # Replace the original before.rules with the updated one
+    sudo mv "$BEFORE_RULES.tmp" "$BEFORE_RULES"
+
+    echo "IGMP and multicast rules added successfully."
 else
-    echo "IGMP and multicast rules already exist in /etc/ufw/before.rules"
+    echo "IGMP and multicast rules already exist in $BEFORE_RULES"
 fi
 
 # Ensure Docker can function with UFW by setting DEFAULT_FORWARD_POLICY to ACCEPT
