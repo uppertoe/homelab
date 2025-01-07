@@ -2,7 +2,6 @@ services:
   homeassistant:
     container_name: homeassistant
     image: lscr.io/linuxserver/homeassistant:latest
-    network_mode: host
     environment:
       # Tell Homeassistant configuration.yaml to allow proxy traffic
       PROXY_NET_SUBNET: "${PROXY_NET_SUBNET}"

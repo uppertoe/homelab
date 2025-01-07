@@ -111,10 +111,11 @@ To set up the self-signed certificates for TLS:
     USERNAME=your_username
     SERVER=your_server_ip
 
-    scp $USERNAME@$SERVER:~homelab/config/mosquitto/config/certs/ca.crt certs/ca.crt
+    scp -P 2222 ca.crt $USERNAME@$SERVER:~/homelab/config/mosquitto/config/certs/ca.crt
 
-    scp $USERNAME@$SERVER:~homelab/config/mosquitto/config/certs/server.crt certs/server.crt
+    scp -P 2222 server.crt $USERNAME@$SERVER:~/homelab/config/mosquitto/config/certs/server.crt
 
-    scp $USERNAME@$SERVER:~homelab/config/mosquitto/config/certs/server.key certs/server.key
+    scp -P 2222 server.key $USERNAME@$SERVER:~/homelab/config/mosquitto/config/certs/server.key
     ```
 6. Delete the certs from the local machine
+
