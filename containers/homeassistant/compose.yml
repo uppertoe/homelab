@@ -64,7 +64,7 @@ services:
         - dialout  # Ensure has permissions for the adapter i.e.: ls -l /dev/ttyACM0
       user: 1000:1000
       volumes:
-          - ${PROJECT_PATH}/${CONFIG}:/app/data
+          - ${PROJECT_PATH}/${CONFIG}/zigbee2mqtt:/app/data
           - /run/udev:/run/udev:ro
       #ports:
           # Frontend port
