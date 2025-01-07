@@ -52,6 +52,44 @@ sudo ufw allow 443/tcp
 # Allow WireGuard VPN traffic
 sudo ufw allow 51820/udp  # WireGuard VPN
 
+# Allow mDNS for local device discovery
+sudo ufw allow from 192.168.4.0/24 to any port 5353 proto udp
+
+# Allow MQTT
+sudo ufw allow 1883/tcp
+
+# Modify /etc/ufw/before.rules to allow IGMP and multicast traffic
+# This is necessary because UFW does not handle some protocols like IGMP by default.
+
+# Check if IGMP and multicast rules are already present to avoid duplication
+if ! sudo grep -q "# Allow IGMP and Multicast traffic" /etc/ufw/before.rules; then
+    sudo bash -c 'cat <<EOF >> /etc/ufw/before.rules
+
+# Allow IGMP and Multicast traffic
+# Allow IGMP
+-A ufw-before-input -p igmp -j ACCEPT
+-A ufw-before-output -p igmp -j ACCEPT
+
+# Allow multicast traffic (224.0.0.0/4)
+-A ufw-before-input -d 224.0.0.0/4 -j ACCEPT
+-A ufw-before-output -d 224.0.0.0/4 -j ACCEPT
+EOF'
+    echo "Added IGMP and multicast rules to /etc/ufw/before.rules"
+else
+    echo "IGMP and multicast rules already exist in /etc/ufw/before.rules"
+fi
+
+# Ensure Docker can function with UFW by setting DEFAULT_FORWARD_POLICY to ACCEPT
+# This allows forwarding of traffic, which is necessary for Docker containers.
+# Only set if not already set.
+
+if ! sudo grep -q "^DEFAULT_FORWARD_POLICY=\"ACCEPT\"" /etc/default/ufw; then
+    sudo sed -i 's/^DEFAULT_FORWARD_POLICY="DROP"/DEFAULT_FORWARD_POLICY="ACCEPT"/' /etc/default/ufw
+    echo "Set DEFAULT_FORWARD_POLICY to ACCEPT in /etc/default/ufw"
+else
+    echo "DEFAULT_FORWARD_POLICY is already set to ACCEPT in /etc/default/ufw"
+fi
+
 # Enable UFW with the new rules
 sudo ufw enable
 

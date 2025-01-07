@@ -77,3 +77,44 @@ Simply send the wildcard apex domain * to the static IP; the reverse proxy will 
 ### Wireguard-Easy
 The client VPN can be configured to forward only DNS requests:
 - Set *Allowed IPs* to the Pihole static IP (eg 10.2.1.200/32)
+
+### Homeassistant
+To enable device discoverability while retaining Docker's 'bridge' neworking mode:
+- Set 'advanced mode' in profile -> user settings
+- Set the network adapters to use in settings -> system -> network
+
+### Mosquitto
+The current configuration is stored in config/mosquitto.conf.
+
+To set up the self-signed certificates for TLS:
+1. Generate the certificates *on your local machine*
+    (this allows easier uploading to Homeassistant)
+    ```
+    scripts/credentials/generate_mosquitto_credentials.sh
+    ```
+2. Go to the Homeassistant web interface
+3. Ensure that advanced mode is enabled in Homeassistant
+4. Add the MQTT integration with the following information:
+
+    | **Input**                          | **Value**    |
+    |------------------------------------|--------------|
+    | Broker                             | localhost    |
+    | Port                               | 1883         |
+    | Use a client certificate           | Yes          |
+    | Upload Client Certificate File     | `client.crt` |
+    | Upload Private Key File            | `client.key` |
+    | Broker Certificate Validation      | Custom       |
+    | Upload Custom CA Certificate File  | `ca.crt`     |
+
+5. Copy the server credentials to the server:
+    ```
+    USERNAME=your_username
+    SERVER=your_server_ip
+
+    scp $USERNAME@$SERVER:~homelab/config/mosquitto/config/certs/ca.crt certs/ca.crt
+
+    scp $USERNAME@$SERVER:~homelab/config/mosquitto/config/certs/server.crt certs/server.crt
+
+    scp $USERNAME@$SERVER:~homelab/config/mosquitto/config/certs/server.key certs/server.key
+    ```
+6. Delete the certs from the local machine

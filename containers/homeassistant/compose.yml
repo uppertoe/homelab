@@ -19,3 +19,66 @@ services:
       - NET_RAW
     networks:
       - proxy-net
+      - private-net
+
+  nodered:  # Port 1880
+    # Low-code interface for automation
+    container_name: nodered
+    image: nodered/node-red
+    restart: unless-stopped
+    networks:
+      - proxy-net
+      - private-net
+    volumes:
+      - ${PROJECT_PATH}/${CONFIG}/nodered:/data
+    depends_on:
+      - homeassistant
+      - mosquitto
+    environment:
+      TZ: "${TZ}"
+
+  mosquitto:
+    # MQTT broker
+    # See: https://www.espboards.dev/blog/secure-mqtt-broker-docker-hass/
+    container_name: mosquitto
+    image: eclipse-mosquitto
+    restart: unless-stopped
+    user: 1000:1000
+    networks:
+      - private-net
+    #ports:
+    #  - 1883:1883
+    #  - 1884:1884
+    #  - 9001:9001  # Websockets
+    volumes:
+      - ${PROJECT_PATH}/${CONFIG}/mosquitto/config:/mosquitto/config
+      - ${PROJECT_PATH}/${CONFIG}/mosquitto/data:/mosquitto/data
+      - ${PROJECT_PATH}/${CONFIG}/mosquitto/log:/mosquitto/log
+    environment:
+      TZ: "${TZ}"
+
+  zigbee2mqtt:  # Port 8080
+  # https://www.zigbee2mqtt.io/guide/installation/02_docker.html
+      container_name: zigbee2mqtt
+      image: koenkk/zigbee2mqtt
+      restart: unless-stopped
+      group_add:
+        - dialout  # Ensure has permissions for the adapter i.e.: ls -l /dev/ttyACM0
+      user: 1000:1000
+      volumes:
+          - ${PROJECT_PATH}/${CONFIG}:/app/data
+          - /run/udev:/run/udev:ro
+      #ports:
+          # Frontend port
+      #    - 8080:8080
+      networks:
+        - proxy-net
+        - private-net
+      environment:
+          - TZ=${TZ}
+      depends_on:
+        - mosquitto
+      devices:
+          # Make sure this matched your adapter location
+          # https://www.zigbee2mqtt.io/guide/configuration/adapter-settings.html#basic-configuration
+          - ${ZIGBEE_ADAPTER_PORT}:/dev/ttyACM0
