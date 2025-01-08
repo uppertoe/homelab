@@ -117,5 +117,5 @@ webhook.{$DOMAIN} {
 # Zigbee2MQTT
 zigbee.{$DOMAIN} {
     import proxy-auth
-    reverse proxy zigbee2mqtt:8080
+    reverse_proxy zigbee2mqtt:8080
 }
