@@ -14,7 +14,6 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
-    user: ${DOCKER_UID}:${DOCKER_GID}
     networks:
       - proxy-net
       - private-net
