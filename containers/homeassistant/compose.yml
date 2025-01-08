@@ -39,6 +39,7 @@ services:
   mosquitto:
     # MQTT broker
     # See: https://www.espboards.dev/blog/secure-mqtt-broker-docker-hass/
+    # Runs with user 1883:1883
     container_name: mosquitto
     image: eclipse-mosquitto
     restart: unless-stopped
@@ -55,8 +56,6 @@ services:
       - ${PROJECT_PATH}/certs/server:/certs
     environment:
       TZ: "${TZ}"
-      PUID: "${DOCKER_UID}"
-      PGID: "${DOCKER_GID}"
 
   zigbee2mqtt:  # Port 8080
   # https://www.zigbee2mqtt.io/guide/installation/02_docker.html

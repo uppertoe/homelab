@@ -24,4 +24,8 @@ DATA_DIR="$PROJECT_DIR/$DATA"
 mkdir -p $CONFIG_DIR $DATA_DIR
 sudo chown -R $USER:$USER $PROJECT_DIR
 
+# Set permissions for mosquitto
+sudo chown -R 1883:1883 $PROJECT_DIR/$CONFIG/mosquitto
+sudo chown -R 1883:1883 $PROJECT_DIR/certs/server
+
 echo "Permissions applied successfully"

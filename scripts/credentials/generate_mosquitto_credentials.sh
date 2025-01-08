@@ -118,8 +118,8 @@ secure_directory () {
     local DIR_PATH="$1"
     echo "$(date) - Securing directory: $DIR_PATH"
 
-    # Assign ownership to DOCKER_UID:DOCKER_GID
-    chown -R "$DOCKER_UID:$DOCKER_GID" "$DIR_PATH"
+    # Assign ownership to Mosquitto container
+    chown -R 1883:1883 "$DIR_PATH"
 
     # Set directory permissions to 700 (rwx------)
     chmod 700 "$DIR_PATH"
