@@ -119,3 +119,9 @@ zigbee.{$DOMAIN} {
     import proxy-auth
     reverse_proxy zigbee2mqtt:8080
 }
+
+# Nodered
+nodered.{$DOMAIN} {
+    import proxy-auth
+    reverse_proxy nodered:1880
+}

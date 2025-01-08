@@ -28,4 +28,9 @@ sudo chown -R $USER:$USER $PROJECT_DIR
 sudo chown -R 1883:1883 $PROJECT_DIR/$CONFIG/mosquitto
 sudo chown -R 1883:1883 $PROJECT_DIR/certs/server
 
+# Add user to groups for homeassistant devices
+sudo usermod -a -G uucp $USER
+sudo usermod -a -G tty $USER
+sudo usermod -a -G dialout $USER
+
 echo "Permissions applied successfully"
