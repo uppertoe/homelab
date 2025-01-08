@@ -1,12 +1,10 @@
 services:
   homeassistant:
     container_name: homeassistant
-    image: lscr.io/linuxserver/homeassistant:latest
+    image: "ghcr.io/home-assistant/home-assistant:stable"
     environment:
       # Tell Homeassistant configuration.yaml to allow proxy traffic
       PROXY_NET_SUBNET: "${PROXY_NET_SUBNET}"
-      PUID: 1000
-      PGID: 1000
       TZ: "${TZ}"
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/homeassistant:/config
@@ -53,7 +51,7 @@ services:
       - ${PROJECT_PATH}/${CONFIG}/mosquitto/config:/mosquitto/config
       - ${PROJECT_PATH}/${CONFIG}/mosquitto/data:/mosquitto/data
       - ${PROJECT_PATH}/${CONFIG}/mosquitto/log:/mosquitto/log
-      - ${PROJECT_PATH}/certs/server:/certs
+      - ${PROJECT_PATH}/certs/server:/certs:ro
     environment:
       TZ: "${TZ}"
 
@@ -67,7 +65,7 @@ services:
       user: 1000:1000
       volumes:
           - ${PROJECT_PATH}/${CONFIG}/zigbee2mqtt:/app/data
-          - ${PROJECT_PATH}/certs/clients/zigbee2mqtt:/certs
+          - ${PROJECT_PATH}/certs/clients/zigbee2mqtt:/certs:ro
           - /run/udev:/run/udev:ro
       #ports:
           # Frontend port
