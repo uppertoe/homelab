@@ -99,7 +99,7 @@ wireguard.{$DOMAIN} {
 
 # Homeassistant Web Interface
 homeassistant.{$DOMAIN} {
-	reverse_proxy {$HOST_IP}:8123
+    reverse_proxy host.docker.internal:8123
 }
 
 # Dozzle Web Interface

@@ -14,6 +14,8 @@ services:
       - "443:443"  # HTTPS
     networks:
       - proxy-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - "${PROJECT_PATH}/${CADDYFILE}:/etc/caddy/Caddyfile:ro"
       - "${PROJECT_PATH}/${CONFIG}/caddy/caddy_data:/data"
