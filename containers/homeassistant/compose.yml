@@ -49,6 +49,8 @@ services:
       - ${PROJECT_PATH}/certs/server:/certs:ro
     environment:
       TZ: "${TZ}"
+    networks:
+      - private-net
 
   zigbee2mqtt:  # Port 8080
   # https://www.zigbee2mqtt.io/guide/installation/02_docker.html
