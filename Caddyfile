@@ -99,7 +99,6 @@ wireguard.{$DOMAIN} {
 
 # Homeassistant Web Interface
 homeassistant.{$DOMAIN} {
-	import proxy-auth
 	reverse_proxy {$HOST_IP}:8123
 }
 
