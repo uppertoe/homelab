@@ -5,6 +5,7 @@ services:
     environment:
       # Tell Homeassistant configuration.yaml to allow proxy traffic
       PROXY_NET_SUBNET: "${PROXY_NET_SUBNET}"
+      HOST_IP: "${HOST_IP}"
       TZ: "${TZ}"
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/homeassistant:/config

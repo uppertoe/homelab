@@ -77,6 +77,37 @@ sudo ufw allow 8883/tcp
 sudo ufw allow from 172.17.0.0/16 to any port 1883 proto tcp comment 'Allow MQTT TCP 1883'
 sudo ufw allow from 172.17.0.0/16 to any port 8883 proto tcp comment 'Allow MQTT TCP 8883'
 
+# Define variables
+LOCAL_SUBNET="192.168.4.0/24"
+PROXY_NET_SUBNET="172.18.0.0/16"  # Replace with your actual proxy-net subnet
+NETWORK_INTERFACE="end0"           # Replace with your actual network interface
+
+# Allow IPv4 mDNS
+sudo ufw allow proto udp from $LOCAL_SUBNET to 224.0.0.251 port 5353 comment 'Allow mDNS for Home Assistant'
+
+# Allow IPv4 SSDP
+sudo ufw allow proto udp from $LOCAL_SUBNET to 239.255.255.250 port 1900 comment 'Allow SSDP for Home Assistant'
+
+# Allow IPv4 LLMNR
+sudo ufw allow proto udp from $LOCAL_SUBNET to 224.0.0.252 port 5355 comment 'Allow LLMNR for Home Assistant'
+
+# Allow IPv6 mDNS
+sudo ufw allow proto udp from fe80::/10 to ff02::1:3 port 5353 comment 'Allow mDNS for Home Assistant (IPv6)'
+
+# Allow IPv6 SSDP
+sudo ufw allow proto udp from fe80::/10 to ff02::c port 1900 comment 'Allow SSDP for Home Assistant (IPv6)'
+
+# Allow IPv6 LLMNR
+sudo ufw allow proto udp from fe80::/10 to ff02::1:3 port 5355 comment 'Allow LLMNR for Home Assistant (IPv6)'
+
+# Allow general IPv6 multicast traffic on the specified interface
+sudo ufw allow in on $NETWORK_INTERFACE to ff02::/16 comment 'Allow IPv6 multicast traffic on $NETWORK_INTERFACE'
+sudo ufw allow out on $NETWORK_INTERFACE to ff02::/16 comment 'Allow IPv6 multicast traffic on $NETWORK_INTERFACE'
+
+# Allow Caddy proxy to access Home Assistant
+sudo ufw allow from $PROXY_NET_SUBNET to any port 8123 proto tcp comment 'Allow Caddy proxy to access Home Assistant'
+
+
 
 # Modify /etc/ufw/before.rules to allow IGMP and multicast traffic
 # This is necessary because UFW does not handle some protocols like IGMP by default.
