@@ -14,9 +14,7 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
-    networks:
-      - proxy-net
-      - private-net
+    network_mode: host
 
   nodered:  # Port 1880
     # Low-code interface for automation
@@ -25,7 +23,6 @@ services:
     restart: unless-stopped
     networks:
       - proxy-net
-      - private-net
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/nodered:/data
     depends_on:
@@ -41,11 +38,9 @@ services:
     container_name: mosquitto
     image: eclipse-mosquitto
     restart: unless-stopped
-    networks:
-      - private-net
-    #ports:
-    #  - 1883:1883
-    #  - 1884:1884
+    ports:
+      - 1883:1883
+      - 8883:8883
     #  - 9001:9001  # Websockets
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/mosquitto/config:/mosquitto/config

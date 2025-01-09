@@ -54,9 +54,29 @@ sudo ufw allow 51820/udp  # WireGuard VPN
 
 # Allow mDNS for local device discovery
 sudo ufw allow from 192.168.4.0/24 to any port 5353 proto udp
+sudo ufw allow from 172.17.0.0/16 to 192.168.100.0/24 proto udp port 5353 comment 'Allow mDNS for Home Assistant'
+
+# Allow UPNP
+sudo ufw allow from 172.17.0.0/16 to 192.168.100.0/24 proto udp port 1900 comment 'Allow SSDP for Home Assistant'
+sudo ufw allow from 172.17.0.0/16 to 192.168.100.0/24 proto tcp port 49152:65535 comment 'Allow UPnP dynamic ports for Home Assistant'
+
+#Allow LLMNR
+sudo ufw allow from 172.17.0.0/16 to 192.168.100.0/24 proto udp port 5355 comment 'Allow LLMNR for Home Assistant'
+
+# Allow COAP
+sudo ufw allow from 172.17.0.0/16 to 192.168.100.0/24 proto udp port 5683 comment 'Allow CoAP for Home Assistant'
+
+sudo ufw allow from 172.17.0.0/16 to 192.168.100.0/24 proto udp port 123 comment 'Allow NTP for Home Assistant'
+sudo ufw allow from 172.17.0.0/16 to 192.168.100.0/24 proto tcp port 53 comment 'Allow DNS TCP for Home Assistant'
+sudo ufw allow from 172.17.0.0/16 to 192.168.100.0/24 proto udp port 53 comment 'Allow DNS UDP for Home Assistant'
+
 
 # Allow MQTT
 sudo ufw allow 1883/tcp
+sudo ufw allow 8883/tcp
+sudo ufw allow from 172.17.0.0/16 to any port 1883 proto tcp comment 'Allow MQTT TCP 1883'
+sudo ufw allow from 172.17.0.0/16 to any port 8883 proto tcp comment 'Allow MQTT TCP 8883'
+
 
 # Modify /etc/ufw/before.rules to allow IGMP and multicast traffic
 # This is necessary because UFW does not handle some protocols like IGMP by default.
