@@ -79,3 +79,15 @@ services:
           # Make sure this matched your adapter location
           # https://www.zigbee2mqtt.io/guide/configuration/adapter-settings.html#basic-configuration
           - ${ZIGBEE_ADAPTER_PORT}:/dev/ttyACM0
+
+  pai: 
+    container_name: pai
+    image: paradoxalarminterface/pai
+    restart: unless-stopped
+    volumes:
+      - ${PROJECT_PATH}/certs/clients/pai:/etc/certs  # client.crt
+      - ${PROJECT_PATH}/${CONFIG}/pai/config:/etc/pai
+      - ${PROJECT_PATH}/${CONFIG}/pai/logs:/var/log/pai
+    networks:
+      - private-net
+

@@ -29,7 +29,7 @@ SERVER_CERT_DIR="$PROJECT_DIR/certs/server"
 CLIENTS_CERT_BASE_DIR="$PROJECT_DIR/certs/clients"
 
 # Define clients
-CLIENTS=("zigbee2mqtt" "homeassistant")
+CLIENTS=("zigbee2mqtt" "homeassistant" "pai")
 
 # Create certificate directories if they don't exist
 echo "$(date) - Creating certificate directories..."
