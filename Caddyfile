@@ -124,3 +124,9 @@ nodered.{$DOMAIN} {
     import proxy-auth
     reverse_proxy nodered:1880
 }
+
+# Backrest
+backrest.{$DOMAIN} {
+    import proxy-auth
+    reverse_proxy backrest:9898
+}

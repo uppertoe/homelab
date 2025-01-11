@@ -7,7 +7,7 @@ include:
   - containers/flame/compose.yml
   - containers/dozzle/compose.yml
   - containers/webhooks/compose.yml
-  #- containers/restic/compose.yml
+  - containers/backrest/compose.yml
 
 networks:
   proxy-net:
