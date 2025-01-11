@@ -116,10 +116,12 @@ done
 # Function to secure a directory
 secure_directory () {
     local DIR_PATH="$1"
+    local PERMS="$2"
     echo "$(date) - Securing directory: $DIR_PATH"
 
     # Assign ownership to Mosquitto container
-    chown -R 1883:1883 "$DIR_PATH"
+    echo "$(date) - Setting permissions for user $PERMS"
+    chown -R $PERMS "$DIR_PATH"
 
     # Set directory permissions to 700 (rwx------)
     chmod 700 "$DIR_PATH"
@@ -145,11 +147,11 @@ secure_directory () {
 }
 
 # Secure the server certificates directory
-secure_directory "$SERVER_CERT_DIR"
+secure_directory "$SERVER_CERT_DIR" "1883:1883"
 
 # Secure each client certificates directory
 for CLIENT in "${CLIENTS[@]}"; do
-    secure_directory "$CLIENTS_CERT_BASE_DIR/$CLIENT"
+    secure_directory "$CLIENTS_CERT_BASE_DIR/$CLIENT" "1000:1000"
 done
 
 # Verification Step: List permissions for server certificates
