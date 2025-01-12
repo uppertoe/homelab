@@ -4,7 +4,7 @@ services:
     container_name: syncthing
     environment:
       - PUID=${DOCKER_UID}
-      - PGID=${DOCEKR_GID}
+      - PGID=${DOCKER_GID}
       - TZ=${TZ}
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/syncthing:/config
