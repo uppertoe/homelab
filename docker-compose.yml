@@ -8,6 +8,7 @@ include:
   - containers/dozzle/compose.yml
   - containers/webhooks/compose.yml
   - containers/backrest/compose.yml
+  - containers/syncthing/compose.yml
 
 networks:
   proxy-net:

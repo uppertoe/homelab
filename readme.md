@@ -87,8 +87,7 @@ To enable device discoverability while retaining Docker's 'bridge' neworking mod
 The current configuration is stored in config/mosquitto.conf.
 
 To set up the self-signed certificates for TLS:
-1. Generate the certificates *on your local machine*
-    (this allows easier uploading to Homeassistant)
+1. Generate the certificates
     ```
     scripts/credentials/generate_mosquitto_credentials.sh
     ```
@@ -106,16 +105,30 @@ To set up the self-signed certificates for TLS:
     | Broker Certificate Validation      | Custom       |
     | Upload Custom CA Certificate File  | `ca.crt`     |
 
-5. Copy the server credentials to the server:
-    ```
-    USERNAME=your_username
-    SERVER=your_server_ip
+The certificates can be found at ~/homelab/certs
 
-    scp -P 2222 ca.crt $USERNAME@$SERVER:~/homelab/config/mosquitto/config/certs/ca.crt
+### Backrest
 
-    scp -P 2222 server.crt $USERNAME@$SERVER:~/homelab/config/mosquitto/config/certs/server.crt
+Using [Backblaze](https://www.backblaze.com) cloud storage:
+- Use the following schema for the bucket URL: s3:https://<BUCKET_URL>/<BUCKET_NAME>
 
-    scp -P 2222 server.key $USERNAME@$SERVER:~/homelab/config/mosquitto/config/certs/server.key
-    ```
-6. Delete the certs from the local machine
+## Network share
 
+### Setup external drive mounting (optional)
+```
+bash scripts/setup_external_drive.sh
+```
+This script will mount and persist an external drive, and create a bind mount for the homelab/config folder
+
+### Create a bind mount + network share
+A samba share is better supported by Windows and MacOS clients:
+```
+sudo bash scripts/fileshare/setup_samba.sh
+```
+NFS is also available:
+```
+sudo bash scripts/fileshare/setup_nfs.sh
+```
+
+
+It is recommended to bind mount a subdirectory of the drive (eg /mnt/homelab/share)
