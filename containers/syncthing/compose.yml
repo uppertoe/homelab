@@ -1,10 +1,10 @@
 services:
   syncthing:  # 8384 for web UI
-    image: syncthing/syncthing
+    image: lscr.io/linuxserver/syncthing:latest
     container_name: syncthing
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${DOCKER_UID}
+      - PGID=${DOCEKR_GID}
       - TZ=${TZ}
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/syncthing:/config
