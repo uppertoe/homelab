@@ -1,64 +1,71 @@
 #!/usr/bin/env bash
 #
-# external_nfs_setup.sh
+# nfs_export_subdir.sh
 #
-# This script helps you pick an external drive partition, mount it,
-# optionally bind-mount it to /srv/nfs/share, and export it via NFS.
+# This script lets you pick a currently-mounted external drive,
+# choose (or create) a subdirectory on that drive, and export it
+# directly via NFS.
 #
 
 set -e  # Exit on error
 
 #######################################
-#               VARIABLES
+#          CONFIGURABLES
 #######################################
-ALLOWED_SUBNET="192.168.0.0/24"     # Adjust to match your local network
-NFS_SHARE_DIR="/srv/nfs/share"      # Default directory to serve over NFS
+
+# Subnet or IP range that should have access to the share
+ALLOWED_SUBNET="192.168.0.0/24"
+
+# NFS export options
 NFS_EXPORT_OPTIONS="rw,sync,no_subtree_check"
 
 #######################################
-#           HELPER FUNCTIONS
+#         HELPER FUNCTIONS
 #######################################
 
-print_header() {
-  echo "=================================================="
-  echo "   External Drive + NFS Setup on Raspberry Pi"
-  echo "=================================================="
-}
-
 require_root() {
-  # We need root or sudo privileges to do things like mounting, editing fstab, etc.
   if [[ $EUID -ne 0 ]]; then
     echo "Please run this script with sudo or as root."
     exit 1
   fi
 }
 
-list_partitions() {
-  # Lists all block devices excluding the root filesystem and possibly other
-  # built-in devices. We filter out 'mmcblk0' (the Pi's SD card) to avoid confusion.
-  # You can adapt the grep if you want to exclude or include other devices.
-  echo "Available partitions (excluding mmcblk0):"
-  lsblk -rpo NAME,TYPE,SIZE,MOUNTPOINT | grep -E "part" | grep -v "mmcblk0" || true
+print_header() {
+  echo "=============================================="
+  echo "     Exporting a Subdirectory via NFS"
+  echo "=============================================="
 }
 
-prompt_partition_choice() {
-  # Capture only the partition names for easy selection
-  mapfile -t PARTITIONS < <(lsblk -rpo NAME,TYPE | grep "part" | grep -v "mmcblk0" | awk '{print $1}')
+list_mounted_drives() {
+  # Show non-root, non-/boot mounts via lsblk
+  echo "Currently mounted volumes (excluding root/boot):"
+  lsblk -rpo NAME,MOUNTPOINT | grep -v "/boot" | grep -v " /$" || true
+}
 
-  if [ ${#PARTITIONS[@]} -eq 0 ]; then
-    echo "No external partitions found (other than the Pi's SD card)."
-    echo "Please connect an external drive and try again."
+prompt_for_mounted_drive() {
+  # Gather mount points (excluding root/boot)
+  mapfile -t MOUNTPOINTS < <(lsblk -rpo NAME,MOUNTPOINT \
+                             | grep -v "/boot" \
+                             | grep -v " /$" \
+                             | awk '{print $2}' \
+                             | sort \
+                             | uniq \
+                             | sed '/^$/d')
+
+  if [ ${#MOUNTPOINTS[@]} -eq 0 ]; then
+    echo "No external drives appear to be mounted (other than system volumes)."
+    echo "Please mount an external drive and re-run this script."
     exit 1
   fi
 
   echo ""
-  echo "Select the partition you would like to mount:"
+  echo "Select which mounted drive/directory to use as a base for the share:"
   PS3="Enter your choice (number): "
-  select PARTITION_CHOICE in "${PARTITIONS[@]}" "Quit"; do
+  select MP_CHOICE in "${MOUNTPOINTS[@]}" "Quit"; do
     case "$REPLY" in
       [0-9]*)
-        if [ "$REPLY" -le "${#PARTITIONS[@]}" ]; then
-          SELECTED_PARTITION="$PARTITION_CHOICE"
+        if [ "$REPLY" -le "${#MOUNTPOINTS[@]}" ]; then
+          BASE_MOUNTPOINT="$MP_CHOICE"
           break
         else
           echo "Invalid option."
@@ -73,105 +80,52 @@ prompt_partition_choice() {
         ;;
     esac
   done
+
+  echo "You selected: $BASE_MOUNTPOINT"
 }
 
-prompt_mountpoint() {
+prompt_for_subdirectory() {
   echo ""
-  echo "Enter the mount point for $SELECTED_PARTITION (e.g., /mnt/external):"
-  read -r MOUNTPOINT
+  echo "Enter the subdirectory (relative or absolute) you want to export from '$BASE_MOUNTPOINT'."
+  echo "For example: 'myshare' (meaning $BASE_MOUNTPOINT/myshare) or an absolute path like /mnt/extern1/config."
+  read -r SUBDIR_INPUT
 
-  # Create the directory if it doesn’t exist
-  if [ ! -d "$MOUNTPOINT" ]; then
-    mkdir -p "$MOUNTPOINT"
-  fi
-}
-
-mount_partition() {
-  # Check if it's already mounted
-  if mount | grep -q "on $MOUNTPOINT "; then
-    echo "$SELECTED_PARTITION is already mounted on $MOUNTPOINT"
+  # If user enters an absolute path starting with '/', use it directly
+  # Otherwise, treat it as relative to $BASE_MOUNTPOINT
+  if [[ "$SUBDIR_INPUT" = /* ]]; then
+    FULL_SUBDIR="$SUBDIR_INPUT"
   else
-    echo "Mounting $SELECTED_PARTITION on $MOUNTPOINT..."
-    mount "$SELECTED_PARTITION" "$MOUNTPOINT"
-    echo "Mounted successfully."
+    FULL_SUBDIR="$BASE_MOUNTPOINT/$SUBDIR_INPUT"
   fi
 
-  # Ask if user wants to add to /etc/fstab
-  read -p "Add this partition to /etc/fstab for persistence? (y/n): " ADD_PART_FSTAB
-  if [[ "$ADD_PART_FSTAB" =~ ^[Yy]$ ]]; then
-    # Check if fstab already has an entry
-    if grep -q "$SELECTED_PARTITION" /etc/fstab; then
-      echo "An entry for $SELECTED_PARTITION already exists in /etc/fstab. Skipping..."
-    else
-      # We'll assume ext4 for simplicity. If different, user needs to edit fstab manually.
-      FSTAB_LINE="$SELECTED_PARTITION  $MOUNTPOINT  ext4  defaults  0  2"
-      echo "Adding to /etc/fstab:"
-      echo "  $FSTAB_LINE"
-      echo "$FSTAB_LINE" >> /etc/fstab
-    fi
+  # Create the subdirectory if it doesn’t exist
+  if [ ! -d "$FULL_SUBDIR" ]; then
+    echo "Directory '$FULL_SUBDIR' does not exist. Creating it..."
+    mkdir -p "$FULL_SUBDIR"
   fi
-}
-
-prompt_bind_mount() {
-  echo ""
-  read -p "Would you like to bind-mount $MOUNTPOINT to $NFS_SHARE_DIR? (y/n): " BIND_CHOICE
-  if [[ "$BIND_CHOICE" =~ ^[Yy]$ ]]; then
-    setup_bind_mount
-  else
-    # If user doesn’t want a bind mount, we’ll just export $MOUNTPOINT directly for NFS.
-    echo "Skipping bind mount."
-    BIND_MOUNTPOINT="$MOUNTPOINT"
-  fi
-}
-
-setup_bind_mount() {
-  # Create the share directory if needed
-  if [ ! -d "$NFS_SHARE_DIR" ]; then
-    mkdir -p "$NFS_SHARE_DIR"
-  fi
-
-  echo "Bind-mounting $MOUNTPOINT to $NFS_SHARE_DIR..."
-  mount --bind "$MOUNTPOINT" "$NFS_SHARE_DIR"
-  echo "Bind mount done."
-
-  # Offer to persist this bind mount in /etc/fstab
-  read -p "Persist this bind mount in /etc/fstab? (y/n): " ADD_BIND_FSTAB
-  if [[ "$ADD_BIND_FSTAB" =~ ^[Yy]$ ]]; then
-    # Check if an fstab entry already exists
-    if grep -q "$NFS_SHARE_DIR" /etc/fstab; then
-      echo "An entry for $NFS_SHARE_DIR already exists in /etc/fstab. Skipping..."
-    else
-      # Format: MOUNTPOINT  NFS_SHARE_DIR  none  bind  0  0
-      BIND_LINE="$MOUNTPOINT  $NFS_SHARE_DIR  none  bind  0  0"
-      echo "Adding the following entry to /etc/fstab:"
-      echo "  $BIND_LINE"
-      echo "$BIND_LINE" >> /etc/fstab
-    fi
-  fi
-
-  # Remember that for the NFS export
-  BIND_MOUNTPOINT="$NFS_SHARE_DIR"
 }
 
 configure_nfs_export() {
   echo ""
-  echo "Now we'll configure an NFS export for $BIND_MOUNTPOINT, accessible by $ALLOWED_SUBNET."
+  echo "Now configuring an NFS export for $FULL_SUBDIR, accessible by $ALLOWED_SUBNET."
   echo "NFS options: $NFS_EXPORT_OPTIONS"
   echo ""
 
-  # Make sure nfs-kernel-server is installed (if not, install it).
+  # Install nfs-kernel-server if needed
   if ! dpkg -l | grep -q nfs-kernel-server; then
     echo "Installing nfs-kernel-server..."
     apt update
     apt install -y nfs-kernel-server
   fi
 
-  # Adjust permissions if necessary
-  chown nobody:nogroup "$BIND_MOUNTPOINT" || true
-  chmod 777 "$BIND_MOUNTPOINT" || true
+  # Adjust permissions if you want broad read/write from all clients
+  chown nobody:nogroup "$FULL_SUBDIR" || true
+  chmod 777 "$FULL_SUBDIR" || true
 
-  # Add to /etc/exports if it’s not already there
-  EXPORT_LINE="$BIND_MOUNTPOINT $ALLOWED_SUBNET($NFS_EXPORT_OPTIONS)"
+  # Form the export line
+  EXPORT_LINE="$FULL_SUBDIR $ALLOWED_SUBNET($NFS_EXPORT_OPTIONS)"
+
+  # Check if it’s already in /etc/exports
   if grep -q "$EXPORT_LINE" /etc/exports; then
     echo "Export line already exists in /etc/exports. Skipping..."
   else
@@ -188,7 +142,7 @@ configure_nfs_export() {
   systemctl restart nfs-kernel-server
 
   echo "NFS export configuration complete!"
-  echo "You can verify with:  sudo exportfs -v"
+  echo "Verify with: exportfs -v"
 }
 
 #######################################
@@ -197,21 +151,19 @@ configure_nfs_export() {
 
 require_root
 print_header
-list_partitions
-prompt_partition_choice
-prompt_mountpoint
-mount_partition
-prompt_bind_mount
+
+list_mounted_drives
+prompt_for_mounted_drive
+prompt_for_subdirectory
 configure_nfs_export
 
 echo ""
-echo "All done!"
-echo "=================================================="
-echo "  Partition:     $SELECTED_PARTITION"
-echo "  Mounted at:    $MOUNTPOINT"
-echo "  Exported from: $BIND_MOUNTPOINT"
-echo "  Accessible by: $ALLOWED_SUBNET"
-echo "=================================================="
-echo "You can run:  mount | grep '$MOUNTPOINT'  to confirm the partition is mounted."
-echo "Or check:     mount | grep '$BIND_MOUNTPOINT'  for the bind mount."
-echo "And:          cat /etc/exports                to see the NFS export."
+echo "========================================="
+echo "             ALL DONE!"
+echo "========================================="
+echo "Your subdirectory is exported:"
+echo "  $FULL_SUBDIR  to  $ALLOWED_SUBNET"
+echo ""
+echo "Check with: mount | grep '$BASE_MOUNTPOINT'"
+echo "And:        exportfs -v"
+echo ""
