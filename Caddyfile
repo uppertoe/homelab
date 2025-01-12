@@ -130,3 +130,9 @@ backrest.{$DOMAIN} {
     import proxy-auth
     reverse_proxy backrest:9898
 }
+
+# Syncthing
+sync.{$DOMAIN} {
+    import proxy-auth
+    reverse_proxy syncthing:8384
+}
