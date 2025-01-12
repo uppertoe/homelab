@@ -9,6 +9,7 @@ include:
   - containers/webhooks/compose.yml
   - containers/backrest/compose.yml
   - containers/syncthing/compose.yml
+  - containers/filebrowser/compose.yml
 
 networks:
   proxy-net:

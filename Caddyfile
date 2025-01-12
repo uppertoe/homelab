@@ -136,3 +136,9 @@ sync.{$DOMAIN} {
     import proxy-auth
     reverse_proxy syncthing:8384
 }
+
+# Filebrowser
+files.{$DOMAIN} {
+    import proxy-auth
+    reverse_proxy filebrowser:8080
+}

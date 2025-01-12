@@ -112,23 +112,14 @@ The certificates can be found at ~/homelab/certs
 Using [Backblaze](https://www.backblaze.com) cloud storage:
 - Use the following schema for the bucket URL: s3:https://<BUCKET_URL>/<BUCKET_NAME>
 
-## Network share
+## Network backups
+Use [Syncthing](https://syncthing.net/) to clone a folder to to server.
 
-### Setup external drive mounting (optional)
-```
-bash scripts/setup_external_drive.sh
-```
-This script will mount and persist an external drive, and create a bind mount for the homelab/config folder
+Suggest using a mounted drive at eg /mnt/homelab with a subdirectory for the share.
 
-### Create a bind mount + network share
-A samba share is better supported by Windows and MacOS clients:
-```
-sudo bash scripts/fileshare/setup_samba.sh
-```
-NFS is also available:
-```
-sudo bash scripts/fileshare/setup_nfs.sh
-```
+This can be added as a volume to the Syncthing container.
 
+The /mnt/share folder can then be backed up using Restic (i.e. using [Backrest](https://github.com/garethgeorge/backrest))
 
-It is recommended to bind mount a subdirectory of the drive (eg /mnt/homelab/share)
+Notes:
+- Syncthing may perform better if clients can specify the server IP address, rather than relying on discovery
