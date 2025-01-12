@@ -1,14 +1,14 @@
 services:
   syncthing:  # 8384 for web UI
-    image: lscr.io/linuxserver/syncthing:latest
+    image: syncthing/syncthing
     container_name: syncthing
     environment:
       - PUID=${DOCKER_UID}
       - PGID=${DOCKER_GID}
       - TZ=${TZ}
     volumes:
-      - ${PROJECT_PATH}/${CONFIG}/syncthing:/config
-      - ${SHARE_PATH}:/share
+      - ${PROJECT_PATH}/${CONFIG}/syncthing:/var/syncthing/config
+      - ${SHARE_PATH}:/share  # Ensure has correct permissions
     ports:
       - 22000:22000/tcp # TCP file transfers
       - 22000:22000/udp # QUIC file transfers
