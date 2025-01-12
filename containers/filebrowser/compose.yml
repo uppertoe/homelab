@@ -5,7 +5,8 @@ services:  # Port 8080 for web interface
     volumes:
       - ${SHARE_PATH}:/data
       - ${PROJECT_PATH}/${CONFIG}/filebrowser:/config
-    #environment:
+    environment:
+      - FB_NOAUTH=true  # Use caddy for authentication
     #  - FB_BASEURL=/filebrowser
     restart: unless-stopped
     networks:
