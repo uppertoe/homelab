@@ -4,7 +4,7 @@
 #
 # This script lets you pick a currently-mounted external drive,
 # choose (or create) a subdirectory on that drive, and export it
-# directly via NFS.
+# directly via NFS (no bind mount needed).
 #
 
 set -e  # Exit on error
@@ -37,34 +37,47 @@ print_header() {
 }
 
 list_mounted_drives() {
-  # Show non-root, non-/boot mounts via lsblk
   echo "Currently mounted volumes (excluding root/boot):"
-  lsblk -rpo NAME,MOUNTPOINT | grep -v "/boot" | grep -v " /$" || true
+  # Explanation:
+  #   - `lsblk -rn -o NAME,MOUNTPOINT`: lists block devices without a header
+  #   - We grep out lines with '/boot' or ' /' if we want to exclude them
+  #   - We only want lines that have a second column (actual mountpoint)
+  #   - Then we print only the second column (the mountpoint) if present
+  #   - We remove duplicates with `sort -u`
+  lsblk -rn -o NAME,MOUNTPOINT \
+    | grep -v " /boot" \
+    | grep -v " /$" \
+    | awk '$2 {print $2}' \
+    | sort -u
 }
 
 prompt_for_mounted_drive() {
-  # Gather mount points (excluding root/boot)
-  mapfile -t MOUNTPOINTS < <(lsblk -rpo NAME,MOUNTPOINT \
-                             | grep -v "/boot" \
-                             | grep -v " /$" \
-                             | awk '{print $2}' \
-                             | sort \
-                             | uniq \
-                             | sed '/^$/d')
+  # Gather a list of mountpoints using the same filter logic above
+  mapfile -t MOUNTPOINTS < <(
+    lsblk -rn -o NAME,MOUNTPOINT \
+      | grep -v " /boot" \
+      | grep -v " /$" \
+      | awk '$2 {print $2}' \
+      | sort -u
+  )
 
   if [ ${#MOUNTPOINTS[@]} -eq 0 ]; then
-    echo "No external drives appear to be mounted (other than system volumes)."
+    echo "No external drives or partitions appear to be mounted (other than system volumes)."
     echo "Please mount an external drive and re-run this script."
     exit 1
   fi
 
   echo ""
-  echo "Select which mounted drive/directory to use as a base for the share:"
+  echo "Select which mounted directory to use as a base for the share:"
   PS3="Enter your choice (number): "
   select MP_CHOICE in "${MOUNTPOINTS[@]}" "Quit"; do
     case "$REPLY" in
       [0-9]*)
         if [ "$REPLY" -le "${#MOUNTPOINTS[@]}" ]; then
+          if [ "$MP_CHOICE" == "Quit" ]; then
+            echo "Exiting..."
+            exit 0
+          fi
           BASE_MOUNTPOINT="$MP_CHOICE"
           break
         else
@@ -152,7 +165,9 @@ configure_nfs_export() {
 require_root
 print_header
 
+echo "Currently mounted volumes (excluding root/boot):"
 list_mounted_drives
+
 prompt_for_mounted_drive
 prompt_for_subdirectory
 configure_nfs_export
