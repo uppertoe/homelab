@@ -2,6 +2,7 @@ services:  # Port 8080 for web interface
   filebrowser:
     image: hurlenko/filebrowser
     user: "${DOCKER_UID}:${DOCKER_GID}"
+    container_name: filebrowser
     volumes:
       - ${SHARE_PATH}:/data
       - ${PROJECT_PATH}/${CONFIG}/filebrowser:/config
