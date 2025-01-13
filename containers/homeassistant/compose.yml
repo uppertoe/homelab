@@ -47,6 +47,7 @@ services:
       - ${PROJECT_PATH}/${CONFIG}/mosquitto/config:/mosquitto/config
       - ${PROJECT_PATH}/${CONFIG}/mosquitto/data:/mosquitto/data
       - ${PROJECT_PATH}/${CONFIG}/mosquitto/log:/mosquitto/log
+      - ${PROJECT_PATH}/${CONFIG}/mosquitto/auth:/etc/mosquitto/auth
       - ${PROJECT_PATH}/certs/server:/certs:ro
     environment:
       TZ: "${TZ}"
@@ -85,7 +86,7 @@ services:
     image: paradoxalarminterface/pai
     restart: unless-stopped
     volumes:
-      - ${PROJECT_PATH}/certs/clients/pai:/etc/certs  # client.crt
+      - ${PROJECT_PATH}/certs/clients/pai:/etc/certs:ro  # client.crt
       - ${PROJECT_PATH}/${CONFIG}/pai/config:/etc/pai
       - ${PROJECT_PATH}/${CONFIG}/pai/logs:/var/log/pai
     networks:

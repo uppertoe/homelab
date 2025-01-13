@@ -225,6 +225,9 @@ fi
 # Install inotify-tools for webhooks
 sudo apt install inotify-tools -y
 
+# Increase inotify limits for Syncthing
+echo "fs.inotify.max_user_watches=204800" | sudo tee -a /etc/sysctl.conf
+
 # Restart the systemd-journald service to apply changes
 sudo systemctl restart systemd-journald
 echo "systemd-journald service restarted to apply changes."

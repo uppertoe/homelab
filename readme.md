@@ -98,7 +98,7 @@ To set up the self-signed certificates for TLS:
     | **Input**                          | **Value**    |
     |------------------------------------|--------------|
     | Broker                             | localhost    |
-    | Port                               | 1883         |
+    | Port                               | 8883         |
     | Use a client certificate           | Yes          |
     | Upload Client Certificate File     | `client.crt` |
     | Upload Private Key File            | `client.key` |
@@ -106,6 +106,19 @@ To set up the self-signed certificates for TLS:
     | Upload Custom CA Certificate File  | `ca.crt`     |
 
 The certificates can be found at ~/homelab/certs
+
+Note: Homeassistant running in bridge networking mode will need to connect to <server_ip>:8883 rather than mosquitto:8883
+- Choose ignore broker's certificate validation as the hostname will not match
+
+5. Create a password (for clients which cannot use a client certificate)
+- Get an interactive shell in the mosquitto container:
+    ```
+    docker compose exec -it mosquitto sh
+    ```
+- Use the [mosquitto_passwd](https://mosquitto.org/documentation/authentication-methods/) utility to create a password:
+    ```
+    mosquitto_passwd -c /etc/mosquitto/auth/password_file <username>
+    ```
 
 ### Backrest
 

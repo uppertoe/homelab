@@ -81,7 +81,7 @@ gen_server () {
 gen_client () {
     local CLIENT_NAME="$1"
     local CLIENT_DIR="$CLIENTS_CERT_BASE_DIR/$CLIENT_NAME"
-    local INFO_CLIENT="/C=AU/ST=SomeState/L=Melbourne/O=homelab/OU=Client/CN=$CLIENT_NAME"
+    local INFO_CLIENT="/C=AU/ST=Victoria/L=Melbourne/O=homelab/OU=Client/CN=$CLIENT_NAME"
 
     echo "$(date) - Generating client certificate and key for $CLIENT_NAME..."
     openssl req -new -nodes -sha256 \
@@ -151,7 +151,7 @@ secure_directory "$SERVER_CERT_DIR" "1883:1883"
 
 # Secure each client certificates directory
 for CLIENT in "${CLIENTS[@]}"; do
-    secure_directory "$CLIENTS_CERT_BASE_DIR/$CLIENT" "1000:1000"
+    secure_directory "$CLIENTS_CERT_BASE_DIR/$CLIENT"
 done
 
 # Verification Step: List permissions for server certificates
