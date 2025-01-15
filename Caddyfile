@@ -142,3 +142,9 @@ files.{$DOMAIN} {
     import proxy-auth
     reverse_proxy filebrowser:8080
 }
+
+# MQTT-UI
+mqtt.{$DOMAIN} {
+    import proxy-auth
+    reverse_proxy mqttui:5000
+}
