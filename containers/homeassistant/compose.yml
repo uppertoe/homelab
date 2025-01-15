@@ -97,10 +97,10 @@ services:
     image: terdia07/mqttui
     restart: unless-stopped
     environment:
-      MQTT_BROKER="mosquitto"
-      MQTT_PORT=8884
-      MQTT_USERNAME=${MQTTUI_USER}
-      MQTT_PASSWORD=${MQTTUI_PASSWORD}
+      MQTT_BROKER: "mosquitto"
+      MQTT_PORT: 8884
+      MQTT_USERNAME: ${MQTTUI_USER}
+      MQTT_PASSWORD: ${MQTTUI_PASSWORD}
     networks:
       - proxy-net
       - private-net
