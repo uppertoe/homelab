@@ -94,7 +94,7 @@ services:
 
   mqttui: # Port 5000
     container_name: mqttui
-    image: terdia07/mqttui:latest
+    image: terdia07/mqttui:v1.3.0
     restart: unless-stopped
     environment:
       MQTT_BROKER: "mosquitto"
