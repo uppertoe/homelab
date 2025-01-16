@@ -136,3 +136,11 @@ The /mnt/share folder can then be backed up using Restic (i.e. using [Backrest](
 
 Notes:
 - Syncthing may perform better if clients can specify the server IP address, rather than relying on discovery
+
+### iSponsorBlockTV
+Check the [installation instructions](https://github.com/dmunozv04/iSponsorBlockTV/wiki/Installation) to set up the TV
+
+Setup CLI:
+```
+docker compose run --rm -it isponsorblocktv --setup-cli
+```
