@@ -142,3 +142,8 @@ files.{$DOMAIN} {
     import proxy-auth
     reverse_proxy filebrowser:8080
 }
+
+# Kimai
+kimai.{$DOMAIN} {
+	reverse_proxy kimai:8001
+}
