@@ -12,7 +12,7 @@ services:
     command: --default-storage-engine innodb
     restart: unless-stopped
     networks:
-      private_net:
+      - private-net
     healthcheck:
       test: mysqladmin -p$$MYSQL_ROOT_PASSWORD ping -h localhost
       interval: 20s
