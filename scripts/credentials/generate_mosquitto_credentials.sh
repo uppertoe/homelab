@@ -151,7 +151,7 @@ secure_directory "$SERVER_CERT_DIR" "1883:1883"
 
 # Secure each client certificates directory
 for CLIENT in "${CLIENTS[@]}"; do
-    secure_directory "$CLIENTS_CERT_BASE_DIR/$CLIENT"
+    secure_directory "$CLIENTS_CERT_BASE_DIR/$CLIENT" "1000:1000"
 done
 
 # Verification Step: List permissions for server certificates
