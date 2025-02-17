@@ -145,5 +145,12 @@ files.{$DOMAIN} {
 
 # Kimai
 kimai.{$DOMAIN} {
+	import proxy-auth
 	reverse_proxy kimai:8001
+}
+
+# Frigate
+frigate.{$DOMAIN} {
+	import proxy-auth
+	reverse_proxy 192.168.4.48:8971
 }
