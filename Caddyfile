@@ -152,5 +152,5 @@ kimai.{$DOMAIN} {
 # Frigate
 frigate.{$DOMAIN} {
 	import proxy-auth
-	reverse_proxy https://192.168.4.48:8971
+	reverse_proxy 192.168.4.48:8971
 }
