@@ -27,6 +27,8 @@ services:
     volumes:
       - "${PROJECT_PATH}/${CONFIG}/kimai/data:/opt/kimai/var/data"
       - "${PROJECT_PATH}/${CONFIG}/kimai/plugins:/opt/kimai/var/plugins"
+      - "${PROJECT_PATH}/${CONFIG}/kimai/local.yaml:/opt/kimai/config/packages/local.yaml"
+      - "${PROJECT_PATH}/${CONFIG}/kimai/custom_templates:/opt/kimai/templates/custom"
     ports:
       - 8001:8001
     environment:
