@@ -3,6 +3,12 @@ services:
     container_name: timetagger
     restart: unless-stopped
     image: ghcr.io/almarklein/timetagger
+    environment:
+      TIMETAGGER_BIND: ${TIMETAGGER_BIND}
+      TIMETAGGER_DATADIR: ${TIMETAGGER_DATADIR}
+      TIMETAGGER_LOG_LEVEL: ${TIMETAGGER_LOG_LEVEL}
+      TIMETAGGER_CREDENTIALS: $TIMETAGGER_CREDENTIALS}
+      TIMETAGGER_PROXY_AUTH_TRUSTED: ${PROXY_NET_SUBNET}
     volumes:
       - ${PROJECT_PATH}/${CONFIG}/timetagger:/opt/_timetagger
     networks:
