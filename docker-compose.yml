@@ -11,7 +11,8 @@ include:
   - containers/syncthing/compose.yml
   - containers/filebrowser/compose.yml
   #- containers/isponsorblocktv/compose.yml
-  - containers/kimai/compose.yml
+  #- containers/kimai/compose.yml
+  - containers/timetagger/compose.yml
 
 networks:
   proxy-net:

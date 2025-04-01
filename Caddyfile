@@ -143,15 +143,13 @@ files.{$DOMAIN} {
     reverse_proxy filebrowser:8080
 }
 
-# Kimai
-kimai.{$DOMAIN} {
-	import proxy-auth
-	reverse_proxy kimai:8001
+# Timetagger
+timetagger.{$DOMAIN} {
+	reverse_proxy timetagger:80
 }
 
 # Frigate
 frigate.{$DOMAIN} {
-	import proxy-auth
     reverse_proxy https://192.168.4.48:8971 {
         transport http {
             # Bypass certificate validation if Frigate is using a self-signed cert

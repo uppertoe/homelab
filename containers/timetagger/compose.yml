@@ -1,0 +1,9 @@
+services:
+  timetagger:
+    container_name: timetagger
+    restart: unless-stopped
+    image: ghcr.io/almarklein/timetagger:latest-nonroot
+    volumes:
+      - ${PROJECT_PATH}/${CONFIG}/timetagger:/opt/_timetagger
+    networks:
+      - proxy-net
