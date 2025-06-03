@@ -157,3 +157,8 @@ frigate.{$DOMAIN} {
         }
     }
 }
+
+# Grocy
+grocy.{$DOMAIN} {
+	reverse_proxy grocy:9283
+}
