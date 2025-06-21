@@ -2,14 +2,15 @@ services:
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
-    dns:
-      - "${UNBOUND_STATIC_IP}"
+    #dns:
+    #  - "${UNBOUND_STATIC_IP}"
     environment:
       TZ: "${TZ}"
       WEBPASSWORD: "" # Auth by Caddy
       PIHOLE_DNS_: unbound
       CUSTOM_CACHE_SIZE: "0"  # Allow unbound to handle
       DNSMASQ_LISTENING: "all"  # Allow VPN access to pihole
+      FTLCONF_dns_upstreams: unbound
     ports:
       - "53:53/tcp" # DNS resolution
       - "53:53/udp" # DNS resolution
