@@ -16,7 +16,6 @@ services:
     image: "klutchell/unbound:latest"
     networks:
       private-net:
-        ipv4_address: "${UNBOUND_STATIC_IP}"
     volumes:
       - "${PROJECT_PATH}/${CONFIG}/unbound:/etc/unbound/custom.conf.d:ro"
     restart: unless-stopped
