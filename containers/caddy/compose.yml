@@ -20,8 +20,6 @@ services:
       - 8.8.8.8
     depends_on:
       - pihole                 # ensure DNS is up before Caddy starts
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
       - "${PROJECT_PATH}/${CADDYFILE}:/etc/caddy/Caddyfile:ro"
       - "${PROJECT_PATH}/${CONFIG}/caddy/caddy_data:/data"
