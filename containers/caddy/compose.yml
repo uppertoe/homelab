@@ -14,6 +14,12 @@ services:
       - "443:443"  # HTTPS
     networks:
       - proxy-net
+    dns:
+      - ${PIHOLE_STATIC_IP}   # Pi-hole on proxy-net
+      - 1.1.1.1               # fallback so ACME works even if Pi-hole is down
+      - 8.8.8.8
+    depends_on:
+      - pihole                 # ensure DNS is up before Caddy starts
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
