@@ -17,8 +17,15 @@ services:
     networks:
       private-net:
     volumes:
-      - "${PROJECT_PATH}/${CONFIG}/unbound:/etc/unbound/custom.conf.d:ro"
+      - "${PROJECT_PATH}/${CONFIG}/unbound:/etc/unbound/custom.conf.d"
     restart: unless-stopped
+    healthcheck:
+      # Use the drill wrapper binary to reduce the exit codes to 0 or 1 for healthchecks
+      test: ['CMD', 'drill-hc', '@127.0.0.1', 'dnssec.works']
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
     depends_on:
       - redis
 
