@@ -5,9 +5,10 @@ services:
     environment:
       TZ: "${TZ}"
       FTLCONF_webserver_api_password: '' # Auth by Caddy
-      PIHOLE_DNS_: "unbound#53"
+      FTLCONF_dns_upstreams: "unbound#53"
       CUSTOM_CACHE_SIZE: "0"  # Allow unbound to handle
       DNSMASQ_LISTENING: "all"  # Allow VPN access to pihole
+      FTLCONF_dns_dnssec: "false"
     ports:
       - "53:53/tcp" # DNS resolution
       - "53:53/udp" # DNS resolution
