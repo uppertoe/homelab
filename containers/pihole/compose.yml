@@ -4,7 +4,7 @@ services:
     image: pihole/pihole:latest
     environment:
       TZ: "${TZ}"
-      FTLCONF_webserver_api_password: "" # Auth by Caddy
+      FTLCONF_webserver_api_password: '' # Auth by Caddy
       PIHOLE_DNS_: "unbound#53"
       CUSTOM_CACHE_SIZE: "0"  # Allow unbound to handle
       DNSMASQ_LISTENING: "all"  # Allow VPN access to pihole
