@@ -4,5 +4,6 @@ services:
         container_name: iSponsorBlockTV
         restart: unless-stopped
         volumes:
-        - ${PROJECT_PATH}/${CONFIG}/isponsorblocktv:/app/data
-        networks: proxy-net
+            - ${PROJECT_PATH}/${CONFIG}/isponsorblocktv:/app/data
+        networks: 
+            - proxy-net
