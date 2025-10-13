@@ -82,6 +82,15 @@ LOCAL_SUBNET="192.168.4.0/24"
 PROXY_NET_SUBNET="172.18.0.0/16"  # Replace with your actual proxy-net subnet
 NETWORK_INTERFACE="end0"           # Replace with your actual network interface
 
+sudo ufw allow from $LOCAL_SUBNET to any port 53 proto udp
+sudo ufw allow from $LOCAL_SUBNET to any port 53 proto tcp
+sudo ufw allow from $PROXY_NET_SUBNET   to any port 53 proto udp
+sudo ufw allow from $PROXY_NET_SUBNET   to any port 53 proto udp tcp
+sudo ufw allow from $PROXY_NET_SUBNET    to any port 53 proto udp
+sudo ufw allow from $PROXY_NET_SUBNET    to any port 53 proto tcp
+
+sudo ufw allow 443/udp comment 'Allow QUIC (HTTP/3) for Caddy'
+
 # Allow IPv4 mDNS
 sudo ufw allow proto udp from $LOCAL_SUBNET to 224.0.0.251 port 5353 comment 'Allow mDNS for Home Assistant'
 
